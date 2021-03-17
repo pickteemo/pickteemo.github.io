@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="ProtoBuf Reflection Note参考：官方文档 Descriptor  一种自动反射消息类型的 Google Protobuf 网络传输方案 Proto使用过程中，有这样几个问题：  对proto中已有的内容进行修改&#x2F;删除非常不方便，例如将proto中的一个字段foo删除，需要：  在.proto里把foo删掉并重新编译， 在工程中删除所有的foo(),set_foo(),muta">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Protobuf Reflection Note">
+<meta property="og:url" content="http://example.com/2021/03/17/note/protobuf-reflection/index.html">
+<meta property="og:site_name" content="Aphelios">
+<meta property="og:description" content="ProtoBuf Reflection Note参考：官方文档 Descriptor  一种自动反射消息类型的 Google Protobuf 网络传输方案 Proto使用过程中，有这样几个问题：  对proto中已有的内容进行修改&#x2F;删除非常不方便，例如将proto中的一个字段foo删除，需要：  在.proto里把foo删掉并重新编译， 在工程中删除所有的foo(),set_foo(),muta">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://izualzhy.cn/assets/images/pb-reflection.png">
+<meta property="article:published_time" content="2021-03-17T06:19:24.000Z">
+<meta property="article:modified_time" content="2021-03-17T09:53:09.406Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://izualzhy.cn/assets/images/pb-reflection.png">
+
+<link rel="canonical" href="http://example.com/2021/03/17/note/protobuf-reflection/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Protobuf Reflection Note | Aphelios</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Aphelios</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/17/note/protobuf-reflection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="the Weapon of the Faithful">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aphelios">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Protobuf Reflection Note
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-03-17 14:19:24 / Modified: 17:53:09" itemprop="dateCreated datePublished" datetime="2021-03-17T14:19:24+08:00">2021-03-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="ProtoBuf-Reflection-Note"><a href="#ProtoBuf-Reflection-Note" class="headerlink" title="ProtoBuf Reflection Note"></a>ProtoBuf Reflection Note</h1><p>参考：<a target="_blank" rel="noopener" href="https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.descriptor#DescriptorPool.generated_pool.details">官方文档 Descriptor</a></p>
+<p> <a target="_blank" rel="noopener" href="https://www.cnblogs.com/Solstice/archive/2011/04/03/2004458.html">一种自动反射消息类型的 Google Protobuf 网络传输方案</a></p>
+<p>Proto使用过程中，有这样几个问题：</p>
+<ol>
+<li><p>对proto中已有的内容进行修改/删除非常不方便，例如将proto中的一个字段foo删除，需要：</p>
+<ol>
+<li>在.proto里把foo删掉并重新编译，</li>
+<li>在工程中删除所有的foo(),set_foo(),mutable_foo()等,否则编译会挂掉。</li>
+</ol>
+<p>尤其当foo不仅仅是一个变量时，或者该proto同时被很多工程使用时，会非常麻烦。</p>
+</li>
+<li><p>拿到了一个pb对象，希望遍历该对象的所有字段(反序列化）。</p>
+<p>例如定义一个pb message如下：</p>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Person person;</span><br><span class="line">person.set_name(<span class="string">&quot;yingshin&quot;</span>);</span><br><span class="line">person.set_age(<span class="number">21</span>);</span><br></pre></td></tr></table></figure>
+
+<p>希望将该对象自动转为json格式的字符串：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;name&quot;</span>:<span class="string">&quot;yingshin&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;age&quot;</span>:<span class="number">21</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果添加了新的字段，输出也能自动更新。</p>
+</li>
+</ol>
+<h3 id="反射"><a href="#反射" class="headerlink" title="反射"></a>反射</h3><p>protobuf提供了一种反射机制，能够动态地调用对象并获取信息。利用protobuf的反射机制，可以帮助优化以上两种场景。</p>
+<p>相关的类：</p>
+<p><img src="https://izualzhy.cn/assets/images/pb-reflection.png" alt="Message"></p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Message</td>
+<td>pb对象</td>
+</tr>
+<tr>
+<td>Descriptor</td>
+<td>对 Message 进行描述，包括 message 的名字、所有字段的描述、原始 proto 文件内容等</td>
+</tr>
+<tr>
+<td>FieldDescriptor</td>
+<td>对 Message 中单个字段进行描述，包括字段名、字段属性、原始的 field 字段等</td>
+</tr>
+<tr>
+<td>Reflection</td>
+<td>提供了动态读和写 message 中单个字段能力</td>
+</tr>
+</tbody></table>
+<p>在实际应用时，我们拿到一个pb对象后，可以：</p>
+<p>通过Descriptor获得其每个字段的name和type</p>
+<p>通过Reflection中的GetX获得具体的字段</p>
+<p>常规的流程是，收到数据包，构造一个pb对象，再反序列化</p>
+<p>利用反射，我们可以使用Descriptor和Refelction来进行动态解析:</p>
+<ul>
+<li><p>使用FindMessageTypebyName() 获得descriptor，来代替手动构造pb对象</p>
+</li>
+<li><p>使用FindFiledByName(“id”)来代替具体的set_id()函数</p>
+</li>
+</ul>
+<h3 id="实例-获取Descriptor-和Reflection"><a href="#实例-获取Descriptor-和Reflection" class="headerlink" title="实例 - 获取Descriptor 和Reflection"></a>实例 - 获取Descriptor 和Reflection</h3><p>对于proto文件：</p>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> T;</span><br><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">Test</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">optional</span> <span class="built_in">int32</span> id = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先我们需要获取Descriptor，最常见的是调用message的GetDescriptor方法</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//直接从message获取，</span></span><br><span class="line">T::Test test;</span><br><span class="line"><span class="keyword">auto</span> descriptor = test.GetDescriptor() ;</span><br><span class="line"><span class="keyword">auto</span> reflecter = test.GetReflection() ;</span><br><span class="line"><span class="comment">// 拿到属性的描述包.</span></span><br><span class="line"><span class="keyword">auto</span> field = descriptor-&gt;FindFieldByName(<span class="string">&quot;id&quot;</span>);</span><br><span class="line"><span class="comment">// 设置属性的值.</span></span><br><span class="line">reflecter-&gt;SetInt32(&amp;test , field , <span class="number">5</span> ) ;</span><br><span class="line"><span class="comment">// 获取属性的值.</span></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span>&lt;&lt;reflecter-&gt;GetInt32(test , field)&lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span> ;</span><br></pre></td></tr></table></figure>
+
+<p>除了调用message的GetDescriptor方法之外，一般有两种方式来获取Descriptor：动态编译与静态编译获取</p>
+<h4 id="动态编译"><a href="#动态编译" class="headerlink" title="动态编译"></a>动态编译</h4><p>使用protobuf的动态编译机制，在运行时对某个proto文件进行动态编译，从而得到其所有元数据(descriptor):</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">DiskSourceTree sourceTree;</span><br><span class="line"><span class="comment">//目录映射&gt; look up .proto file in current directory</span></span><br><span class="line">sourceTree.MapPath(<span class="string">&quot;&quot;</span>, <span class="string">&quot;./&quot;</span>);</span><br><span class="line"><span class="function">Importer <span class="title">importer</span><span class="params">(&amp;sourceTree, <span class="literal">NULL</span>)</span></span>;</span><br><span class="line"><span class="comment">//runtime compile foo.proto</span></span><br><span class="line">importer.Import(<span class="string">&quot;foo.proto&quot;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="comment">//拿到Descriptor</span></span><br><span class="line"><span class="keyword">const</span> Descriptor *descriptor1 = importer.pool()-&gt;FindMessageTypeByName(<span class="string">&quot;Test.Foo&quot;</span>);</span><br><span class="line"><span class="comment">// 创建一个动态的消息工厂.</span></span><br><span class="line">google::protobuf::DynamicMessageFactory factory;</span><br><span class="line"><span class="comment">// 从消息工厂中创建出一个类型原型.</span></span><br><span class="line"><span class="keyword">auto</span> proto1 = factory.GetPrototype(descriptor1);</span><br><span class="line"><span class="comment">// 构造一个可用的消息.</span></span><br><span class="line"><span class="keyword">auto</span> message1= proto1-&gt;New();</span><br><span class="line"><span class="comment">// 通过反射接口给字段赋值.</span></span><br><span class="line"><span class="keyword">auto</span> reflection1 = message1-&gt;GetReflection();</span><br><span class="line"><span class="keyword">auto</span> filed1 = descriptor1-&gt;FindFieldByName(<span class="string">&quot;id&quot;</span>);</span><br><span class="line">reflection1-&gt;SetInt32(message1,filed1,<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; message1-&gt;DebugString();</span><br><span class="line"><span class="keyword">delete</span> message1 ;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Note:我在尝试动态编译foo.proto时，如果foo.proto有import其他目录下的proto，会提示找不到文件，还没找到解决问题的方法。</p>
+</blockquote>
+<h4 id="静态编译"><a href="#静态编译" class="headerlink" title="静态编译"></a>静态编译</h4><p>在proto生成的pb.h/cc的构造函数中，会调用静态类static void MessageFactory::InternalRegisterGeneratedFile将自己注册到DescriptorPool::generated_pool中，后续可以直接使用generated_pool拿到Descriptor。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">T::Test xxx; <span class="comment">//需要调用一次注册到generated_pool中</span></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">string</span> str;</span><br><span class="line">xxx.SerializeToString(str);</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> descriptor = google::protobuf::DescriptorPool::generated_pool()-&gt;FindMessageTypeByName(<span class="string">&quot;T.Test&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="literal">nullptr</span> == descriptor) <span class="keyword">return</span> <span class="number">0</span>；</span><br><span class="line"></span><br><span class="line"><span class="comment">// 利用Descriptor拿到类型注册的instance</span></span><br><span class="line"><span class="keyword">auto</span> prototype = google::protobuf::MessageFactory::generated_factory()-&gt;GetPrototype(descriptor);</span><br><span class="line"><span class="keyword">if</span> ( <span class="literal">nullptr</span> == descriptor) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 构造一个可用的消息.</span></span><br><span class="line"><span class="keyword">auto</span> message = prototype-&gt;New();</span><br><span class="line"><span class="comment">// 从序列化好的str中进行反序列化</span></span><br><span class="line">message-&gt;ParseFromString(str);</span><br><span class="line"><span class="comment">// 从message中拿到Descriptor和Reflection</span></span><br><span class="line"><span class="keyword">const</span> google::protobuf::Reflection* reflection = message.GetReflection();</span><br><span class="line"><span class="keyword">const</span> google::protobuf::Descriptor* descriptor = message.GetDescriptor();</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> message ;</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span> ;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="一些工程中的应用实例"><a href="#一些工程中的应用实例" class="headerlink" title="一些工程中的应用实例"></a>一些工程中的应用实例</h3><p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://izualzhy.cn/protobuf-message-reflection">https://izualzhy.cn/protobuf-message-reflection</a></p>
+<p><a target="_blank" rel="noopener" href="http://arganzheng.life/reflection-of-protobuf.html">http://arganzheng.life/reflection-of-protobuf.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1753977">https://cloud.tencent.com/developer/article/1753977</a></p>
+<h4 id="自动序列化及反序列化"><a href="#自动序列化及反序列化" class="headerlink" title="自动序列化及反序列化"></a>自动序列化及反序列化</h4><h4 id="serialize-message"><a href="#serialize-message" class="headerlink" title="serialize_message"></a>serialize_message</h4><p>serialize_message遍历提取message中各个字段以及对应的值，序列化到string中。<br>主要思路就是通过Descriptor得到每个字段的描述符：字段名、字段的cpp类型。<br>通过Reflection的GetX接口获取对应的value。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">serialize_message</span><span class="params">(<span class="keyword">const</span> google::protobuf::Message&amp; message, <span class="built_in">std</span>::<span class="built_in">string</span>* serialized_string)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> google::protobuf::Descriptor* descriptor = message.GetDescriptor();</span><br><span class="line">    <span class="keyword">const</span> google::protobuf::Reflection* reflection = message.GetReflection();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; descriptor-&gt;field_count(); ++i) &#123;</span><br><span class="line">        <span class="keyword">const</span> google::protobuf::FieldDescriptor* field = descriptor-&gt;field(i);</span><br><span class="line">        <span class="keyword">bool</span> has_field = reflection-&gt;HasField(message, field);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (has_field) &#123;</span><br><span class="line">            <span class="comment">//arrays not supported</span></span><br><span class="line">            assert(!field-&gt;is_repeated());</span><br><span class="line"></span><br><span class="line">            <span class="keyword">switch</span> (field-&gt;cpp_type()) &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CASE_FIELD_TYPE(cpptype, method, valuetype)\</span></span><br><span class="line">                <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_#<span class="meta">#cpptype:&#123;\</span></span><br><span class="line">                    valuetype value = reflection-&gt;Get#<span class="meta">#method(message, field);\</span></span><br><span class="line">                    <span class="keyword">int</span> wsize = field-&gt;name().size();\</span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;wsize), <span class="keyword">sizeof</span>(wsize));\</span><br><span class="line">                    serialized_string-&gt;append(field-&gt;name().c_str(), field-&gt;name().size());\</span><br><span class="line">                    wsize = <span class="keyword">sizeof</span>(value);\</span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;wsize), <span class="keyword">sizeof</span>(wsize));\</span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;value), <span class="keyword">sizeof</span>(value));\</span><br><span class="line">                    <span class="keyword">break</span>;\</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                CASE_FIELD_TYPE(INT32, Int32, <span class="keyword">int</span>);</span><br><span class="line">                CASE_FIELD_TYPE(UINT32, UInt32, <span class="keyword">uint32_t</span>);</span><br><span class="line">                CASE_FIELD_TYPE(FLOAT, Float, <span class="keyword">float</span>);</span><br><span class="line">                CASE_FIELD_TYPE(DOUBLE, Double, <span class="keyword">double</span>);</span><br><span class="line">                CASE_FIELD_TYPE(BOOL, Bool, <span class="keyword">bool</span>);</span><br><span class="line">                CASE_FIELD_TYPE(INT64, Int64, <span class="keyword">int64_t</span>);</span><br><span class="line">                CASE_FIELD_TYPE(UINT64, UInt64, <span class="keyword">uint64_t</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">undef</span> CASE_FIELD_TYPE</span></span><br><span class="line">                <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_ENUM: &#123;</span><br><span class="line">                    <span class="keyword">int</span> value = reflection-&gt;GetEnum(message, field)-&gt;number();</span><br><span class="line">                    <span class="keyword">int</span> wsize = field-&gt;name().size();</span><br><span class="line">                    <span class="comment">//写入name占用字节数</span></span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;wsize), <span class="keyword">sizeof</span>(wsize));</span><br><span class="line">                    <span class="comment">//写入name</span></span><br><span class="line">                    serialized_string-&gt;append(field-&gt;name().c_str(), field-&gt;name().size());</span><br><span class="line">                    wsize = <span class="keyword">sizeof</span>(value);</span><br><span class="line">                    <span class="comment">//写入value占用字节数</span></span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;wsize), <span class="keyword">sizeof</span>(wsize));</span><br><span class="line">                    <span class="comment">//写入value</span></span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;value), <span class="keyword">sizeof</span>(value));</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_STRING: &#123;</span><br><span class="line">                    <span class="built_in">std</span>::<span class="built_in">string</span> value = reflection-&gt;GetString(message, field);</span><br><span class="line">                    <span class="keyword">int</span> wsize = field-&gt;name().size();</span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;wsize), <span class="keyword">sizeof</span>(wsize));</span><br><span class="line">                    serialized_string-&gt;append(field-&gt;name().c_str(), field-&gt;name().size());</span><br><span class="line">                    wsize = value.size();</span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;wsize), <span class="keyword">sizeof</span>(wsize));</span><br><span class="line">                    serialized_string-&gt;append(value.c_str(), value.size());</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE: &#123;</span><br><span class="line">                    <span class="built_in">std</span>::<span class="built_in">string</span> value;</span><br><span class="line">                    <span class="keyword">int</span> wsize = field-&gt;name().size();</span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;wsize), <span class="keyword">sizeof</span>(wsize));</span><br><span class="line">                    serialized_string-&gt;append(field-&gt;name().c_str(), field-&gt;name().size());</span><br><span class="line">                    <span class="keyword">const</span> google::protobuf::Message&amp; submessage = reflection-&gt;GetMessage(message, field);</span><br><span class="line">                    serialize_message(submessage, &amp;value);</span><br><span class="line">                    wsize = value.size();</span><br><span class="line">                    serialized_string-&gt;append(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">char</span>*&gt;(&amp;wsize), <span class="keyword">sizeof</span>(wsize));</span><br><span class="line">                    serialized_string-&gt;append(value.c_str(), value.size());</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="parse-message"><a href="#parse-message" class="headerlink" title="parse_message"></a>parse_message</h4><p>parse_message通过读取field/value，还原message对象。<br>主要思路跟serialize_message很像，通过Descriptor得到每个字段的描述符FieldDescriptor，通过Reflection的SetX填充message。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">parse_message</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; serialized_string, google::protobuf::Message* message)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> google::protobuf::Descriptor* descriptor = message-&gt;GetDescriptor();</span><br><span class="line">    <span class="keyword">const</span> google::protobuf::Reflection* reflection = message-&gt;GetReflection();</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, <span class="keyword">const</span> google::protobuf::FieldDescriptor*&gt; field_map;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; descriptor-&gt;field_count(); ++i) &#123;</span><br><span class="line">        <span class="keyword">const</span> google::protobuf::FieldDescriptor* field = descriptor-&gt;field(i);</span><br><span class="line">        field_map[field-&gt;name()] = field;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> google::protobuf::FieldDescriptor* field = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">size_t</span> pos = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (pos &lt; serialized_string.size()) &#123;</span><br><span class="line">        <span class="keyword">int</span> name_size = *(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> <span class="keyword">int</span>*&gt;(serialized_string.substr(pos, <span class="keyword">sizeof</span>(<span class="keyword">int</span>)).c_str()));</span><br><span class="line">        pos += <span class="keyword">sizeof</span>(<span class="keyword">int</span>);</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">string</span> name = serialized_string.substr(pos, name_size);</span><br><span class="line">        pos += name_size;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> value_size = *(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> <span class="keyword">int</span>*&gt;(serialized_string.substr(pos, <span class="keyword">sizeof</span>(<span class="keyword">int</span>)).c_str()));</span><br><span class="line">        pos += <span class="keyword">sizeof</span>(<span class="keyword">int</span>);</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">string</span> value = serialized_string.substr(pos, value_size);</span><br><span class="line">        pos += value_size;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, <span class="keyword">const</span> google::protobuf::FieldDescriptor*&gt;::iterator iter =</span><br><span class="line">            field_map.find(name);</span><br><span class="line">        <span class="keyword">if</span> (iter == field_map.end()) &#123;</span><br><span class="line">            <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;no field found.\n&quot;</span>);</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            field = iter-&gt;second;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        assert(!field-&gt;is_repeated());</span><br><span class="line">        <span class="keyword">switch</span> (field-&gt;cpp_type()) &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CASE_FIELD_TYPE(cpptype, method, valuetype)\</span></span><br><span class="line">            <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_#<span class="meta">#cpptype: &#123;\</span></span><br><span class="line">                reflection-&gt;Set#<span class="meta">#method(\</span></span><br><span class="line">                        message,\</span><br><span class="line">                        field,\</span><br><span class="line">                        *(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> valuetype*&gt;(value.c_str())));\</span><br><span class="line">                <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; field-&gt;name() &lt;&lt; <span class="string">&quot;\t&quot;</span> &lt;&lt; *(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> valuetype*&gt;(value.c_str())) &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;\</span><br><span class="line">                <span class="keyword">break</span>;\</span><br><span class="line">            &#125;</span><br><span class="line">            CASE_FIELD_TYPE(INT32, Int32, <span class="keyword">int</span>);</span><br><span class="line">            CASE_FIELD_TYPE(UINT32, UInt32, <span class="keyword">uint32_t</span>);</span><br><span class="line">            CASE_FIELD_TYPE(FLOAT, Float, <span class="keyword">float</span>);</span><br><span class="line">            CASE_FIELD_TYPE(DOUBLE, Double, <span class="keyword">double</span>);</span><br><span class="line">            CASE_FIELD_TYPE(BOOL, Bool, <span class="keyword">bool</span>);</span><br><span class="line">            CASE_FIELD_TYPE(INT64, Int64, <span class="keyword">int64_t</span>);</span><br><span class="line">            CASE_FIELD_TYPE(UINT64, UInt64, <span class="keyword">uint64_t</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">undef</span> CASE_FIELD_TYPE</span></span><br><span class="line">            <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_ENUM: &#123;</span><br><span class="line">                <span class="keyword">const</span> google::protobuf::EnumValueDescriptor* enum_value_descriptor =</span><br><span class="line">                    field-&gt;enum_type()-&gt;FindValueByNumber(*(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> <span class="keyword">int</span>*&gt;(value.c_str())));</span><br><span class="line">                reflection-&gt;SetEnum(message, field, enum_value_descriptor);</span><br><span class="line">                <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; field-&gt;name() &lt;&lt; <span class="string">&quot;\t&quot;</span> &lt;&lt; *(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> <span class="keyword">int</span>*&gt;(value.c_str())) &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_STRING: &#123;</span><br><span class="line">                reflection-&gt;SetString(message, field, value);</span><br><span class="line">                <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; field-&gt;name() &lt;&lt; <span class="string">&quot;\t&quot;</span> &lt;&lt; value &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE: &#123;</span><br><span class="line">                google::protobuf::Message* submessage = reflection-&gt;MutableMessage(message, field);</span><br><span class="line">                parse_message(value, submessage);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">default</span>: &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="获取-PB-中所有非空字段"><a href="#获取-PB-中所有非空字段" class="headerlink" title="获取 PB 中所有非空字段"></a>获取 PB 中所有非空字段</h4><p>在业务中，经常会需要获取某个 Message 中所有非空字段，形成一个 map&lt;string,string&gt;，使用 PB 反射写法如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;pb_util.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sstream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> comm_tools &#123;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">PbToMap</span><span class="params">(<span class="keyword">const</span> google::protobuf::Message &amp;message,</span></span></span><br><span class="line"><span class="function"><span class="params">            <span class="built_in">std</span>::<span class="built_in">map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, <span class="built_in">std</span>::<span class="built_in">string</span>&gt; &amp;out)</span> </span>&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CASE_FIELD_TYPE(cpptype, method, valuetype)                            \</span></span><br><span class="line">  <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_#<span class="meta">#cpptype: &#123;                 \</span></span><br><span class="line">    valuetype value = reflection-&gt;Get#<span class="meta">#method(message, field);                 \</span></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">ostringstream</span> oss;                                                    \</span><br><span class="line">    oss &lt;&lt; value;                                                              \</span><br><span class="line">    out[field-&gt;name()] = oss.str();                                            \</span><br><span class="line">    <span class="keyword">break</span>;                                                                     \</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CASE_FIELD_TYPE_ENUM()                                                 \</span></span><br><span class="line">  <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_ENUM: &#123;                      \</span><br><span class="line">    <span class="keyword">int</span> value = reflection-&gt;GetEnum(message, field)-&gt;number();                 \</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">ostringstream</span> oss;                                                    \</span><br><span class="line">    oss &lt;&lt; value;                                                              \</span><br><span class="line">    out[field-&gt;name()] = oss.str();                                            \</span><br><span class="line">    <span class="keyword">break</span>;                                                                     \</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CASE_FIELD_TYPE_STRING()                                               \</span></span><br><span class="line">  <span class="keyword">case</span> google::protobuf::FieldDescriptor::CPPTYPE_STRING: &#123;                    \</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> value = reflection-&gt;GetString(message, field);                 \</span><br><span class="line">    out[field-&gt;name()] = value;                                                \</span><br><span class="line">    <span class="keyword">break</span>;                                                                     \</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> google::protobuf::Descriptor *descriptor = message.GetDescriptor();</span><br><span class="line">  <span class="keyword">const</span> google::protobuf::Reflection *reflection = message.GetReflection();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; descriptor-&gt;field_count(); i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> google::protobuf::FieldDescriptor *field = descriptor-&gt;field(i);</span><br><span class="line">    <span class="keyword">bool</span> has_field = reflection-&gt;HasField(message, field);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (has_field) &#123;</span><br><span class="line">      <span class="keyword">if</span> (field-&gt;is_repeated()) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">// 不支持转换repeated字段</span></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> &amp;field_name = field-&gt;name();</span><br><span class="line">      <span class="keyword">switch</span> (field-&gt;cpp_type()) &#123;</span><br><span class="line">        CASE_FIELD_TYPE(INT32, Int32, <span class="keyword">int</span>);</span><br><span class="line">        CASE_FIELD_TYPE(UINT32, UInt32, <span class="keyword">uint32_t</span>);</span><br><span class="line">        CASE_FIELD_TYPE(FLOAT, Float, <span class="keyword">float</span>);</span><br><span class="line">        CASE_FIELD_TYPE(DOUBLE, Double, <span class="keyword">double</span>);</span><br><span class="line">        CASE_FIELD_TYPE(BOOL, Bool, <span class="keyword">bool</span>);</span><br><span class="line">        CASE_FIELD_TYPE(INT64, Int64, <span class="keyword">int64_t</span>);</span><br><span class="line">        CASE_FIELD_TYPE(UINT64, UInt64, <span class="keyword">uint64_t</span>);</span><br><span class="line">        CASE_FIELD_TYPE_ENUM();</span><br><span class="line">        CASE_FIELD_TYPE_STRING();</span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">// 其他异常类型</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">&#125; <span class="comment">// namespace comm_tools</span></span><br></pre></td></tr></table></figure>
+
+<p>通过上面的代码，如果需要在 proto 中增加字段，不再需要修改原来的代码。</p>
+<blockquote>
+<p>repeated类型的数据比较特殊，可以单独搞一个List来存</p>
+</blockquote>
+<h4 id="Self-describing-Messages"><a href="#Self-describing-Messages" class="headerlink" title="Self-describing Messages"></a><a target="_blank" rel="noopener" href="https://developers.google.com/protocol-buffers/docs/techniques?hl=zh-CN#self-description">Self-describing Messages</a></h4>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/17/Apollo/Planning/1_11_speed_heuristic_optimizer/" rel="prev" title="1.11 Speed Heuristic Optimizer">
+      <i class="fa fa-chevron-left"></i> 1.11 Speed Heuristic Optimizer
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/03/17/Apollo/Planning/1_12_speed_decider/" rel="next" title="1.12 Speed Decider">
+      1.12 Speed Decider <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ProtoBuf-Reflection-Note"><span class="nav-number">1.</span> <span class="nav-text">ProtoBuf Reflection Note</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%B0%84"><span class="nav-number">1.0.1.</span> <span class="nav-text">反射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B-%E8%8E%B7%E5%8F%96Descriptor-%E5%92%8CReflection"><span class="nav-number">1.0.2.</span> <span class="nav-text">实例 - 获取Descriptor 和Reflection</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E7%BC%96%E8%AF%91"><span class="nav-number">1.0.2.1.</span> <span class="nav-text">动态编译</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91"><span class="nav-number">1.0.2.2.</span> <span class="nav-text">静态编译</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E5%B7%A5%E7%A8%8B%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.0.3.</span> <span class="nav-text">一些工程中的应用实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%BA%8F%E5%88%97%E5%8C%96%E5%8F%8A%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">1.0.3.1.</span> <span class="nav-text">自动序列化及反序列化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#serialize-message"><span class="nav-number">1.0.3.2.</span> <span class="nav-text">serialize_message</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#parse-message"><span class="nav-number">1.0.3.3.</span> <span class="nav-text">parse_message</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-PB-%E4%B8%AD%E6%89%80%E6%9C%89%E9%9D%9E%E7%A9%BA%E5%AD%97%E6%AE%B5"><span class="nav-number">1.0.3.4.</span> <span class="nav-text">获取 PB 中所有非空字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Self-describing-Messages"><span class="nav-number">1.0.3.5.</span> <span class="nav-text">Self-describing Messages</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">the Weapon of the Faithful</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"></span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
