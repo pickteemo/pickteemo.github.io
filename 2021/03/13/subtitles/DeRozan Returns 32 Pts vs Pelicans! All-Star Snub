@@ -269,8 +269,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/03/13/Apollo/Planning/1_10_speed_bounds_prior_decider/" rel="prev" title="1.10 Speed Bounds Prior Decider">
-      <i class="fa fa-chevron-left"></i> 1.10 Speed Bounds Prior Decider
+    <a href="/2021/03/13/Apollo/Planning/1_7_path_decider/" rel="prev" title="1.7 Path Decider">
+      <i class="fa fa-chevron-left"></i> 1.7 Path Decider
     </a></div>
       <div class="post-nav-item">
     <a href="/2021/03/13/about/" rel="next" title="About">
