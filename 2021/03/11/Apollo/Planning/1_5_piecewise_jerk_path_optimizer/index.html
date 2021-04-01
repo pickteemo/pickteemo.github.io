@@ -29,7 +29,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://s3.ax1x.com/2021/02/04/y1of1I.png">
 <meta property="article:published_time" content="2021-03-11T11:11:43.000Z">
-<meta property="article:modified_time" content="2021-03-18T03:20:38.501Z">
+<meta property="article:modified_time" content="2021-04-01T03:42:41.593Z">
 <meta property="article:tag" content="Apollo">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://s3.ax1x.com/2021/02/04/y1of1I.png">
@@ -186,7 +186,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-18 11:20:38" itemprop="dateModified" datetime="2021-03-18T11:20:38+08:00">2021-03-18</time>
+                <time title="Modified: 2021-04-01 11:42:41" itemprop="dateModified" datetime="2021-04-01T11:42:41+08:00">2021-04-01</time>
               </span>
 
           
@@ -200,51 +200,273 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>如下图所示，frenet坐标系下，给定边界，使用优化的思想求解轨迹<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/y1of1I"><img src="https://s3.ax1x.com/2021/02/04/y1of1I.png" alt="y1of1I.png"></a></p>
-<span id="more"></span>
-
+        <p>如下图所示，frenet坐标系下，给定边界，使用优化的思想求解轨迹<br><a target="_blank" rel="noopener" href="https://imgchr.com/i/y1of1I"><img src="https://s3.ax1x.com/2021/02/04/y1of1I.png" alt="y1of1I.png"></a><br><span id="more"></span></p>
 <p>在frenet坐标系下，规划一条在平滑（舒适）、安全（限定空间）的轨迹。<br>定义代价函数包括平滑性、靠近中心线、终点，在上下边界内求解使代价函数最小的目标轨迹</p>
 <h3 id="Optimality-Modeling"><a href="#Optimality-Modeling" class="headerlink" title="Optimality Modeling"></a>Optimality Modeling</h3><blockquote>
-<p>We consider the following factors in modeling the optimality of a path:</p>
-<ol>
-<li>Collision-free The path must not intersect with obstacles in the environment.</li>
-<li>Minimal lateral deviation If there is no collision risk, the vehicle should stay as close to the center of the lane  as possible.</li>
-<li>Minimal lateral movement The lateral movement and its rate of change must be minimized. These two terms implicitly represent how quickly the vehicle moves laterally.</li>
-<li>(Optional)Maximal obstacle distance Maximize the distance between the vehicle and the obstacles to allow clearance for the vehicle to pass through safely. This factor turns out can be represented as the distance between the vehicle and the center of its corresponding path boundary.</li>
-</ol>
+<p>We consider the following factors in modeling the optimality of a path:<br>1) Collision-free The path must not intersect with obstacles in the environment.<br>2) Minimal lateral deviation If there is no collision risk, the vehicle should stay as close to the center of the lane  as possible.<br>3) Minimal lateral movement The lateral movement and its rate of change must be minimized. These two terms implicitly represent how quickly the vehicle moves laterally.<br>4) (Optional)Maximal obstacle distance Maximize the distance between the vehicle and the obstacles to allow clearance for the vehicle to pass through safely. This factor turns out can be represented as the distance between the vehicle and the center of its corresponding path boundary.</p>
 </blockquote>
 <p>从以下角度出发来规划和评价path：<br>    1 无碰撞<br>    2 最小横向偏差 - 沿中心线行驶<br>    3 最小横向位移 - 降低横向位移和位移频率<br>    4 （可选）远离障碍物<br>从而设计cost:</p>
-<p>$$<br>minimize\ f(l(s)) = w_l\cdot \int l(s)^2ds + w_{l’}\cdot \int l’(s)^2ds +  w_{l’’}\cdot \int l’’(s)^2ds +  w_{l’’’}\cdot \int l’’’(s)^2ds +\<br> w_{obs} \cdot\int (l(s) - 0.5*(l_B(s)<em>{min} + l_B(s)</em>{max}))^2ds + \<br>w_{end_l}\cdot (l_{n-1} - l_{endref})^2 + w_{end_{dl}}\cdot ({l}’<em>{n-1}-{l</em>{endref}}’)^2 + w_{end_{ddl}}\cdot ({l}’’<em>{n-1} - {l</em>{endref}}’’)^2\<br>$$</p>
-<p>subject to the safety constraint:</p>
-<p>$$<br>    l(s)\in l_B(s), \forall s\in [0,s_{max}]<br>$$</p>
-<p>在cost中：<br>    第一行表示平滑，l,l’,l’’,l’’’最小<br>    第二行表示中心线，尽量沿中心线行驶<br>    第三行表示终点权重</p>
+<script type="math/tex; mode=display">
+minimize\ f(l(s)) = w_l\cdot \int l(s)^2ds + w_{l'}\cdot \int l'(s)^2ds +  w_{l''}\cdot \int l''(s)^2ds +  w_{l'''}\cdot \int l'''(s)^2ds +\\
+ w_{obs} \cdot\int (l(s) - 0.5*(l_B(s)_{min} + l_B(s)_{max}))^2ds + \\
+w_{end_l}\cdot (l_{n-1} - l_{endref})^2 + w_{end_{dl}}\cdot ({l}'_{n-1}-{l_{endref}}')^2 + w_{end_{ddl}}\cdot ({l}''_{n-1} - {l_{endref}}'')^2\\</script><p>subject to the safety constraint:</p>
+<script type="math/tex; mode=display">
+    l(s)\in l_B(s), \forall s\in [0,s_{max}]</script><p>在cost中：<br>    第一行表示平滑，l,l’,l’’,l’’’最小<br>    第二行表示中心线，尽量沿中心线行驶<br>    第三行表示终点权重</p>
 <h3 id="Formulation"><a href="#Formulation" class="headerlink" title="Formulation"></a>Formulation</h3><blockquote>
 <p>To effectively formulate an optimization problem and evaluate constraint satisfaction in practice, our approach discretizes the path function l(s) according to the spatial parameter s to a certain resolution ∆s, and uses these discretized points to control the shape of the path, and approximately evaluate constraint satisfactions. Same ap- proach has been used in our previously published work . The key idea is to discretize the 1-dimensional function to second-order derivative level, and use constant third-order derivative terms to “connect” consecutive discretized points. Third order derivative of a positional variable is commonly named jerk. Thus this formulation is named piecewise-jerk method.</p>
 </blockquote>
 <p>frenet坐标系下，沿固定距离△s将路径均匀采样<br>使用常三阶多项式连接各个点（每段曲线的三阶导数jerk为常量）</p>
-<p>$$<br>\begin{matrix} l_0\l_0’\l_0’’ \end{matrix}<br>\overset{\Delta s}{\rightarrow}<br>\begin{matrix} l_1\l_1’\l_1’’ \end{matrix}<br>\overset{\Delta s}{\rightarrow}<br>\begin{matrix} l_2\l_2’\l_2’’ \end{matrix}<br>…<br>\begin{matrix} l_{n-2}\l_{n-2}’\l_{n-2}’’ \end{matrix}<br>\overset{\Delta s}{\rightarrow}<br>\begin{matrix} l_{n-1}\l_{n-1}’\l_{n-1}’’ \end{matrix}<br>$$</p>
-<p>三阶导数是常量，那么有:</p>
-<p>$$<br>l_{i\rightarrow i+1}’’’ = \frac{l_{i+1}’’ - l_i’’}{\Delta s}<br>$$</p>
-<p>积分得到：</p>
-<p>$$<br>{l_{i+1}}’’ = \int_{0}^{\Delta s}{l_{i-&gt;i+1}}’’’ds={l_i}’’+{l_{i-&gt;i+1}}’’’\cdot\Delta s\<br>{l_{i+1}}’={l_i}’+\int_{0}^{\Delta s}{l}’’(s)ds={l_i}’+{l_i}’’\cdot\Delta s+\frac{1}{2}{l_{i-&gt;i+1}}’’’\cdot\Delta s^2\<br>l_{i+1}=l_i+\int_{0}^{\Delta s}{l}’(s)ds\=l_i+(l_i)’\cdot\Delta s+\frac{1}{2}{l_i}’’\cdot s^2+\frac{1}{6}{l_{i-&gt;i+1}}’’’\cdot\Delta s^3<br>$$</p>
-<h3 id="qp-problem"><a href="#qp-problem" class="headerlink" title="qp problem"></a>qp problem</h3><h4 id="qp的一般形式"><a href="#qp的一般形式" class="headerlink" title="qp的一般形式"></a>qp的一般形式</h4><p>$$<br>minimize \frac{1}{2} \cdot x^T \cdot P \cdot x + q \cdot x \<br>s.t. LB \leq A\cdot x \leq UB<br>$$</p>
-<h4 id="将cost转为qp格式"><a href="#将cost转为qp格式" class="headerlink" title="将cost转为qp格式"></a>将cost转为qp格式</h4><p>以4个点P1,P2,P3,P4为例<br>我们要求解的矩阵x为：</p>
-<p>$$<br>\begin{vmatrix}<br>l_1\<br>l_2\<br>l_3\<br>l_4\<br>l_1’\<br>l_2’\<br>l_3’\<br>l_4’\<br>l_1’’\<br>l_2’’\<br>l_3’’\<br>l_4’’\<br>\end{vmatrix}<br>$$</p>
-<p>先看cost中的平滑项：</p>
-<p>$$<br>w_l\cdot \sum_{i=0}^{n-1} l_i^2 + w_{{l}’}\cdot \sum_{i=0}^{n-1} {l_i}’^2 + w_{{l}’’}\cdot\sum_{i=0}^{n-1} {l_i}’’^2 + w_{{l}’’’}\cdot \sum_{i=0}^{n-2}(\frac{{l_{i+1}}’’ - {l_i}’’}{\Delta s})^2<br>$$</p>
+<script type="math/tex; mode=display">
+\begin{matrix} l_0\\l_0'\\l_0'' \end{matrix} 
+\overset{\Delta s}{\rightarrow}
+\begin{matrix} l_1\\l_1'\\l_1'' \end{matrix} 
+\overset{\Delta s}{\rightarrow}
+\begin{matrix} l_2\\l_2'\\l_2'' \end{matrix} 
+...
+\begin{matrix} l_{n-2}\\l_{n-2}'\\l_{n-2}'' \end{matrix} 
+\overset{\Delta s}{\rightarrow}
+\begin{matrix} l_{n-1}\\l_{n-1}'\\l_{n-1}'' \end{matrix}</script><p>三阶导数是常量，那么有:</p>
+<script type="math/tex; mode=display">
+l_{i\rightarrow i+1}''' = \frac{l_{i+1}'' - l_i''}{\Delta s}</script><p>积分得到：</p>
+<script type="math/tex; mode=display">
+{l_{i+1}}'' = \int_{0}^{\Delta s}{l_{i->i+1}}'''ds={l_i}''+{l_{i->i+1}}'''\cdot\Delta s\\
+{l_{i+1}}'={l_i}'+\int_{0}^{\Delta s}{l}''(s)ds={l_i}'+{l_i}''\cdot\Delta s+\frac{1}{2}{l_{i->i+1}}'''\cdot\Delta s^2\\
+l_{i+1}=l_i+\int_{0}^{\Delta s}{l}'(s)ds\\=l_i+(l_i)'\cdot\Delta s+\frac{1}{2}{l_i}''\cdot s^2+\frac{1}{6}{l_{i->i+1}}'''\cdot\Delta s^3</script><h3 id="qp-problem"><a href="#qp-problem" class="headerlink" title="qp problem"></a>qp problem</h3><h4 id="qp的一般形式"><a href="#qp的一般形式" class="headerlink" title="qp的一般形式"></a>qp的一般形式</h4><script type="math/tex; mode=display">
+minimize \frac{1}{2} \cdot x^T \cdot P \cdot x + q \cdot x \\
+s.t. LB \leq A\cdot x \leq UB</script><h4 id="将cost转为qp格式"><a href="#将cost转为qp格式" class="headerlink" title="将cost转为qp格式"></a>将cost转为qp格式</h4><p>以4个点P1,P2,P3,P4为例<br>我们要求解的矩阵x为：</p>
+<script type="math/tex; mode=display">
+\begin{vmatrix}
+l_1\\
+l_2\\
+l_3\\
+l_4\\
+l_1'\\
+l_2'\\
+l_3'\\
+l_4'\\
+l_1''\\
+l_2''\\
+l_3''\\
+l_4''\\
+\end{vmatrix}</script><p>先看cost中的平滑项：</p>
+<p>$ w<em>l\cdot \sum</em>{i=0}^{n-1} l<em>i^2 +w</em>{ { l }’}\cdot \sum<em>{i=0}^{n-1}{l_i}’^2+w</em>{ { l }’’}\cdot\sum<em>{i=0}^{n-1} {l_i}’’^2+w</em>{ { l }’’’}\cdot\sum<em>{i=0}^{n-2}(\frac{ { l</em>{i+1 } }’’ - {l_i}’’}{\Delta s})^2 $</p>
 <p>转为P矩阵:</p>
-<p>$$<br>\begin{vmatrix}<br>w_l&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;w_l&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;w_l&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;w_l&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;w_{{l}’}&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;w_{{l}’}&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;w_{{l}’}&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;w_{{l}’}&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;w_{{l}’’}+\frac{w_{{l}’’’}}{\Delta s^2}&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;-2\frac{w_{{l}’’’}}{\Delta s^2}&amp;w_{{l}’’}+2\frac{w_{{l}’’’}}{\Delta s^2}&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;-2\frac{w_{{l}’’’}}{\Delta s^2}&amp;w_{{l}’’}+2\frac{w_{{l}’’’}}{\Delta s^2}&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;-2\frac{w_{{l}’’’}}{\Delta s^2}&amp;w_{{l}’’}+\frac{w_{{l}’’’}}{\Delta s^2}\<br>\end{vmatrix}<br>$$</p>
-<p>ref项的cost：<br>$$<br>w_{obs}\cdot \sum_{i=0}^{n-1}(l_i-l_{ref})^2 \<br>$$<br>转为P矩阵：<br>$$<br>\begin{vmatrix}<br>w_{ref_1}&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;w_{ref_2}&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;w_{ref_3}&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;w_{ref_4}&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>\end{vmatrix}<br>$$<br>和q矩阵：<br>$$<br>\begin{vmatrix}<br>-2w_{ref_1}\cdot l_{ref_1}\<br>-2w_{ref_2}\cdot l_{ref_2}\<br>-2w_{ref_3}\cdot l_{ref_3}\<br>-2w_{ref_4}\cdot l_{ref_4}\<br>\end{vmatrix}<br>$$</p>
-<p>end_state的cost：<br>$$<br>w_{end_l}\cdot (l_{n-1} - l_{endref})^2 + w_{end_{dl}}\cdot ({l}’<em>{n-1}-{l</em>{endref}}’)^2 + w_{end_{ddl}}\cdot ({l}’’<em>{n-1} - {l</em>{endref}}’’)^2<br>$$<br>转为P矩阵：<br>$$<br>\begin{vmatrix}<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;w_{end_l}&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;w_{end_{dl}}&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;w_{end_{ddl}}<br>\end{vmatrix}<br>$$<br>和q矩阵：<br>$$<br>\begin{vmatrix}<br>0\<br>0\<br>0\<br>-2w_{end_l}\cdot end_l\<br>0\<br>0\<br>0\<br>-2w_{end_dl}\cdot end_dl\<br>0\<br>0\<br>0\<br>-2w_{end_ddl}\cdot end_ddl\<br>\end{vmatrix}<br>$$</p>
-<p>上面三个矩阵加在一起，就得到了我们最终需要的P矩阵和q矩阵。<br>（省略了code中的scale_factor 项</p>
-<h4 id="将bound转为qp格式"><a href="#将bound转为qp格式" class="headerlink" title="将bound转为qp格式"></a>将bound转为qp格式</h4><p>bound主要由三部分组成：<br>    - 在path bound decider中获取的上下边界<br>    - l’ l’’ l’’’的约束<br>    - 起点约束<br>    - 数学约束，上述的l,l’,l’’,l’’’的数学关系</p>
-<p>拆开来看,<br>1.道路边界(l)约束：<br>$$<br>\begin{bmatrix}<br>lb_{s1} \<br>lb_{s2} \<br>lb_{s3} \<br>lb_{s4}<br>\end{bmatrix}<br> \leq<br> \begin{bmatrix}<br>1&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;\<br>0&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;\<br>0&amp;0&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;\<br>0&amp;0&amp;0&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;\<br> \end{bmatrix}<br> x<br> \leq<br> \begin{bmatrix}<br>ub_{s1} \<br>ub_{s2} \<br>ub_{s3} \<br>ub_{s4}<br> \end{bmatrix}<br>$$<br>2. tan(heading)(l’，)约束，目前为固定值2.0：<br>$$<br> \begin{bmatrix}<br>-2.0 \<br>-2.0 \<br>-2.0 \<br>-2.0<br>\end{bmatrix}<br> \leq<br> \begin{bmatrix}<br>0&amp;0&amp;0&amp;0&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;1&amp;0&amp;0&amp;0&amp;0\<br> \end{bmatrix}<br> x<br> \leq<br> \begin{bmatrix}<br>2.0 \<br>2.0 \<br>2.0 \<br>2.0<br> \end{bmatrix}<br>$$<br>3.kappa(l’’)约束，道路kappa±自车允许的最大kappa：<br>$$<br>\begin{bmatrix}<br>-lat_acc_bound + kappa_{s1} \<br>-lat_acc_bound + kappa_{s2} \<br>-lat_acc_bound + kappa_{s3} \<br>-lat_acc_bound + kappa_{s4}<br>\end{bmatrix}<br> \leq<br> \begin{bmatrix}<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;1&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;1&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;1&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;1\<br> \end{bmatrix}<br> x<br> \leq<br> \begin{bmatrix}<br>lat_acc_bound + kappa_{s1} \<br>lat_acc_bound + kappa_{s2} \<br>lat_acc_bound + kappa_{s3} \<br>lat_acc_bound + kappa_{s4}<br> \end{bmatrix}<br>$$<br>4. jerk约束：<br>由上面的jerk表达式：<br>$$<br>l_{i\rightarrow i+1}’’’ = (l_{i+1}’’ - l_i’’) / \Delta s<br>$$<br>jerk bound的计算没有看懂，用的是kappa/vehicle_speed?</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">double PiecewiseJerkPathOptimizer::EstimateJerkBoundary(</span><br><span class="line">    const double vehicle_speed, const double axis_distance,</span><br><span class="line">    const double max_yaw_rate) const &#123;</span><br><span class="line">  return max_yaw_rate &#x2F; axis_distance &#x2F; vehicle_speed;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>转为矩阵形式：<br>$$<br>\begin{bmatrix}<br>-jerk_1 * \Delta s \<br>-jerk_2 * \Delta s \<br>-jerk_3 * \Delta s<br>\end{bmatrix}<br> \leq<br> \begin{bmatrix}<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;-1&amp;1&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;-1&amp;1&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;-1&amp;1\<br> \end{bmatrix}<br> x<br> \leq<br> \begin{bmatrix}<br>jerk_1 * \Delta s \<br>jerk_2 * \Delta s \<br>jerk_3 * \Delta s<br> \end{bmatrix}<br>$$<br>5.起点约束<br>$$<br>\begin{bmatrix}<br>ego_l \<br>ego_{dl} \<br>ego_{ddl} \<br>\end{bmatrix}<br> \leq<br> \begin{bmatrix}<br>1&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;1&amp;0&amp;0&amp;0\<br> \end{bmatrix}<br> x<br> \leq<br> \begin{bmatrix}<br>ego_l \<br>ego_{dl} \<br>ego_{ddl} \<br> \end{bmatrix}<br>$$<br>6. 数学关系 - l’’ -&gt; l’约束<br>对该式<br>$$<br>{l_{i+1}}’={l_i}’+\int_{0}^{\Delta s}{l}’’(s)ds={l_i}’+{l_i}’’\cdot\Delta s+\frac{1}{2}{l_{i\rightarrow i+1}}’’’\cdot\Delta s^2\<br>$$<br>将jerk式代入，有：<br>$$<br>l_{i+1}’ - l_i’ - 0.5\Delta s *l_i’’ - 0.5\Delta s *l_{i+1}’’ = 0<br>$$<br>也就是：<br>$$<br>\begin{bmatrix}<br>0 \<br>0 \<br>0<br>\end{bmatrix}<br> \leq<br> \begin{bmatrix}<br>0&amp;0&amp;0&amp;0&amp;-1&amp;1&amp;0&amp;0&amp;-0.5\cdot\Delta s&amp;-0.5\cdot\Delta s&amp;0&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;-1&amp;1&amp;0&amp;0&amp;-0.5\cdot\Delta s&amp;-0.5\cdot\Delta s&amp;0\<br>0&amp;0&amp;0&amp;0&amp;0&amp;0&amp;-1&amp;1&amp;0&amp;0&amp;-0.5\cdot\Delta s&amp;-0.5\cdot\Delta s\<br> \end{bmatrix}<br> x<br> \leq<br> \begin{bmatrix}<br>0 \<br>0 \<br>0<br> \end{bmatrix}<br>$$</p>
-<ol start="7">
-<li>数学关系 - l’ -&gt; l 约束<br>和上面的方法一样，<br>由<br>$$<br>l_{i+1}=l_i+\int_{0}^{\Delta s}{l}’(s)ds=l_i+(l_i)’\cdot\Delta s+\frac{1}{2}{l_i}’’\cdot s^2+\frac{1}{6}{l_{i\rightarrow i+1}}’’’\cdot\Delta s^3<br>$$<br>得到：<br>$$<br>l_{i+1} - l_i - \Delta s \cdot l_i’ - \frac{1}{2} \Delta s ^2 \cdot l_i’’ - \frac{1}{6} \Delta s^3 \cdot l_{i+1}’’ = 0<br>$$<br>转为矩阵：<br>$$<br>\begin{bmatrix}<br>0 \<br>0 \<br>0<br>\end{bmatrix}<br>\leq<br>\begin{bmatrix} </li>
+<script type="math/tex; mode=display">
+\begin{vmatrix}
+w_l&0&0&0&0&0&0&0&0&0&0&0\\
+0&w_l&0&0&0&0&0&0&0&0&0&0\\
+0&0&w_l&0&0&0&0&0&0&0&0&0\\
+0&0&0&w_l&0&0&0&0&0&0&0&0\\
+0&0&0&0&w_{ {l }'}&0&0&0&0&0&0&0\\
+0&0&0&0&0&w_ { { l }'}&0&0&0&0&0&0\\
+0&0&0&0&0&0&w_ { { l }'}&0&0&0&0&0\\
+0&0&0&0&0&0&0&w_ { { l }'}&0&0&0&0\\
+0&0&0&0&0&0&0&0&w_ { { l }''}+\frac{w_{ { l }'''}}{\Delta s^2}&0&0&0\\
+0&0&0&0&0&0&0&0&-2\frac{w_ { { l }'''}}{\Delta s^2}&w_{ { l }''}+2\frac{w_{ { l }'''}}{\Delta s^2}&0&0\\
+0&0&0&0&0&0&0&0&0&-2\frac{w_{ { l }'''}}{\Delta s^2}&w_{ { l }''}+2\frac{w_{ { l }'''}}{\Delta s^2}&0\\
+0&0&0&0&0&0&0&0&0&0&-2\frac{w_{ { l }'''}}{\Delta s^2}&w_{ { l }''}+\frac{w_{ { l }'''}}{\Delta s^2}\\
+\end{vmatrix}</script><p>ref项的cost：</p>
+<script type="math/tex; mode=display">
+w_{obs}\cdot \sum_{i=0}^{n-1}(l_i-l_{ref})^2 \\</script><p>转为P矩阵：</p>
+<script type="math/tex; mode=display">
+\begin{vmatrix}
+w_{ref_1}&0&0&0&0&0&0&0&0&0&0&0\\
+0&w_{ref_2}&0&0&0&0&0&0&0&0&0&0\\
+0&0&w_{ref_3}&0&0&0&0&0&0&0&0&0\\
+0&0&0&w_{ref_4}&0&0&0&0&0&0&0&0\\
+\end{vmatrix}</script><p>和q矩阵：</p>
+<script type="math/tex; mode=display">
+\begin{vmatrix}
+-2w_{ref_1}\cdot l_{ref_1}\\
+-2w_{ref_2}\cdot l_{ref_2}\\
+-2w_{ref_3}\cdot l_{ref_3}\\
+-2w_{ref_4}\cdot l_{ref_4}\\
+\end{vmatrix}</script><p>end_state的cost：</p>
+<script type="math/tex; mode=display">
+w_{end_l}\cdot (l_{n-1} - l_{endref})^2 + w_{end_{dl}}\cdot ({l}'_{n-1}-{l_{endref}}')^2 + w_{end_{ddl}}\cdot ({l}''_{n-1} - {l_{endref}}'')^2</script><p>转为P矩阵：</p>
+<script type="math/tex; mode=display">
+\begin{vmatrix}
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&w_{end_l}&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&w_{end_{dl}}&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&w_{end_{ddl}}
+\end{vmatrix}</script><p>和q矩阵：</p>
+<script type="math/tex; mode=display">
+\begin{vmatrix}
+0\\
+0\\
+0\\
+-2w_{end_l}\cdot end_l\\
+0\\
+0\\
+0\\
+-2w_{end_dl}\cdot end_dl\\
+0\\
+0\\
+0\\
+-2w_{end_ddl}\cdot end_ddl\\
+\end{vmatrix}</script><p>上面三个矩阵加在一起，就得到了我们最终需要的P矩阵和q矩阵。<br>（省略了code中的scale_factor 项</p>
+<h4 id="将bound转为qp格式"><a href="#将bound转为qp格式" class="headerlink" title="将bound转为qp格式"></a>将bound转为qp格式</h4><p>bound主要由三部分组成：</p>
+<pre><code>- 在path bound decider中获取的上下边界
+- l&#39; l&#39;&#39; l&#39;&#39;&#39;的约束
+- 起点约束
+- 数学约束，上述的l,l&#39;,l&#39;&#39;,l&#39;&#39;&#39;的数学关系
+</code></pre><p>拆开来看,<br>1.道路边界(l)约束：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+lb_{s1} \\ 
+lb_{s2} \\ 
+lb_{s3} \\
+lb_{s4} 
+\end{bmatrix} 
+ \leq 
+ \begin{bmatrix} 
+1&0&0&0&0&0&0&0&0&0&0&0&\\
+0&1&0&0&0&0&0&0&0&0&0&0&\\
+0&0&1&0&0&0&0&0&0&0&0&0&\\
+0&0&0&1&0&0&0&0&0&0&0&0&\\
+ \end{bmatrix} 
+ x 
+ \leq  
+ \begin{bmatrix}
+ub_{s1} \\ 
+ub_{s2} \\ 
+ub_{s3} \\
+ub_{s4} 
+ \end{bmatrix}</script><ol>
+<li>tan(heading)(l’，)约束，目前为固定值2.0：<script type="math/tex; mode=display">
+\begin{bmatrix}
+-2.0 \\ 
+-2.0 \\ 
+-2.0 \\
+-2.0 
+\end{bmatrix} 
+\leq 
+\begin{bmatrix} 
+0&0&0&0&1&0&0&0&0&0&0&0\\
+0&0&0&0&0&1&0&0&0&0&0&0\\
+0&0&0&0&0&0&1&0&0&0&0&0\\
+0&0&0&0&0&0&0&1&0&0&0&0\\
+\end{bmatrix} 
+x 
+\leq  
+\begin{bmatrix}
+2.0 \\ 
+2.0 \\ 
+2.0 \\
+2.0 
+\end{bmatrix}</script>3.kappa(l’’)约束，道路kappa±自车允许的最大kappa：<script type="math/tex; mode=display">
+\begin{bmatrix}
+-lat\_acc\_bound + kappa_{s1} \\ 
+-lat\_acc\_bound + kappa_{s2} \\ 
+-lat\_acc\_bound + kappa_{s3} \\
+-lat\_acc\_bound + kappa_{s4} 
+\end{bmatrix} 
+\leq 
+\begin{bmatrix} 
+0&0&0&0&0&0&0&0&1&0&0&0\\
+0&0&0&0&0&0&0&0&0&1&0&0\\
+0&0&0&0&0&0&0&0&0&0&1&0\\
+0&0&0&0&0&0&0&0&0&0&0&1\\
+\end{bmatrix} 
+x 
+\leq  
+\begin{bmatrix}
+lat\_acc\_bound + kappa_{s1} \\ 
+lat\_acc\_bound + kappa_{s2} \\ 
+lat\_acc\_bound + kappa_{s3} \\
+lat\_acc\_bound + kappa_{s4} 
+\end{bmatrix}</script></li>
+<li>jerk约束：<br>由上面的jerk表达式：<script type="math/tex; mode=display">
+l_{i\rightarrow i+1}''' = (l_{i+1}'' - l_i'') / \Delta s</script>jerk bound的计算没有看懂，用的是kappa/vehicle_speed?<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">double PiecewiseJerkPathOptimizer::EstimateJerkBoundary(</span><br><span class="line">    const double vehicle_speed, const double axis_distance,</span><br><span class="line">    const double max_yaw_rate) const &#123;</span><br><span class="line">  return max_yaw_rate &#x2F; axis_distance &#x2F; vehicle_speed;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+转为矩阵形式：<script type="math/tex; mode=display">
+\begin{bmatrix}
+-jerk_1 * \Delta s \\ 
+-jerk_2 * \Delta s \\ 
+-jerk_3 * \Delta s 
+\end{bmatrix} 
+\leq 
+\begin{bmatrix} 
+0&0&0&0&0&0&0&0&-1&1&0&0\\
+0&0&0&0&0&0&0&0&0&-1&1&0\\
+0&0&0&0&0&0&0&0&0&0&-1&1\\
+\end{bmatrix} 
+x 
+\leq  
+\begin{bmatrix}
+jerk_1 * \Delta s \\ 
+jerk_2 * \Delta s \\ 
+jerk_3 * \Delta s 
+\end{bmatrix}</script>5.起点约束<script type="math/tex; mode=display">
+\begin{bmatrix}
+ego_l \\ 
+ego_{dl} \\ 
+ego_{ddl} \\
+\end{bmatrix} 
+\leq 
+\begin{bmatrix} 
+1&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&1&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&1&0&0&0\\
+\end{bmatrix} 
+x 
+\leq  
+\begin{bmatrix}
+ego_l \\ 
+ego_{dl} \\ 
+ego_{ddl} \\
+\end{bmatrix}</script></li>
+<li>数学关系 - l’’ -&gt; l’约束<br>对该式<script type="math/tex; mode=display">
+{l_{i+1}}'={l_i}'+\int_{0}^{\Delta s}{l}''(s)ds={l_i}'+{l_i}''\cdot\Delta s+\frac{1}{2}{l_{i\rightarrow i+1}}'''\cdot\Delta s^2\\</script>将jerk式代入，有：<script type="math/tex; mode=display">
+l_{i+1}' - l_i' - 0.5\Delta s *l_i'' - 0.5\Delta s *l_{i+1}'' = 0</script>也就是：<script type="math/tex; mode=display">
+\begin{bmatrix}
+0 \\ 
+0 \\ 
+0 
+\end{bmatrix} 
+\leq 
+\begin{bmatrix} 
+0&0&0&0&-1&1&0&0&-0.5\cdot\Delta s&-0.5\cdot\Delta s&0&0\\
+0&0&0&0&0&-1&1&0&0&-0.5\cdot\Delta s&-0.5\cdot\Delta s&0\\
+0&0&0&0&0&0&-1&1&0&0&-0.5\cdot\Delta s&-0.5\cdot\Delta s\\
+\end{bmatrix} 
+x 
+\leq  
+\begin{bmatrix}
+0 \\ 
+0 \\ 
+0 
+\end{bmatrix}</script></li>
+<li>数学关系 - l’ -&gt; l 约束<br>和上面的方法一样，<br>由<script type="math/tex; mode=display">
+l_{i+1}=l_i+\int_{0}^{\Delta s}{l}'(s)ds=l_i+(l_i)'\cdot\Delta s+\frac{1}{2}{l_i}''\cdot s^2+\frac{1}{6}{l_{i\rightarrow i+1}}'''\cdot\Delta s^3</script>得到：<script type="math/tex; mode=display">
+l_{i+1} - l_i - \Delta s \cdot l_i' - \frac{1}{2} \Delta s ^2 \cdot l_i'' - \frac{1}{6} \Delta s^3 \cdot l_{i+1}'' = 0</script>转为矩阵：<script type="math/tex; mode=display">
+\begin{bmatrix}
+0 \\ 
+0 \\ 
+0 
+\end{bmatrix} 
+\leq 
+\begin{bmatrix} 
+-1&1&0&0&-\Delta s&0&0&0&-\frac{1}{2}\Delta s^2&-\frac{1}{6}\Delta s^3&0&0\\
+0&-1&1&0&0&-\Delta s&0&0&0&-\frac{1}{2}\Delta s^2&-\frac{1}{6}\Delta s^3&0\\
+0&0&-1&1&0&0&-\Delta s&0&0&0&-\frac{1}{2}\Delta s^2&-\frac{1}{6}\Delta s^3\\
+\end{bmatrix} 
+x 
+\leq  
+\begin{bmatrix}
+0 \\ 
+0 \\ 
+0 
+\end{bmatrix}</script></li>
 </ol>
-<p>-1&amp;1&amp;0&amp;0&amp;-\Delta s&amp;0&amp;0&amp;0&amp;-\frac{1}{2}\Delta s^2&amp;-\frac{1}{6}\Delta s^3&amp;0&amp;0\<br>0&amp;-1&amp;1&amp;0&amp;0&amp;-\Delta s&amp;0&amp;0&amp;0&amp;-\frac{1}{2}\Delta s^2&amp;-\frac{1}{6}\Delta s^3&amp;0\<br>0&amp;0&amp;-1&amp;1&amp;0&amp;0&amp;-\Delta s&amp;0&amp;0&amp;0&amp;-\frac{1}{2}\Delta s^2&amp;-\frac{1}{6}\Delta s^3\<br> \end{bmatrix}<br> x<br> \leq<br> \begin{bmatrix}<br>0 \<br>0 \<br>0<br> \end{bmatrix}<br>$$</p>
 <p>以上就是整个formulate problem的过程，通过以上步骤完成了P,q,A,LB,UB五个矩阵，接下来使用osqp求解器进行求解</p>
 <h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><p>Optimal Vehicle Path Planning Using Quadratic Optimization for Baidu Apollo Open Platform (2020 IEEE Intelligent Vehicles Symposium (IV) October 20-23,     2020. Las Vegas, USA)</p>
 
@@ -344,7 +566,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -433,6 +655,61 @@
 
 
   
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 

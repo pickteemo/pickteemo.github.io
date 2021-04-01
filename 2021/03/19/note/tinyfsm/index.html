@@ -20,12 +20,12 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="(tinyfsm usage)[https:&#x2F;&#x2F;digint.ch&#x2F;tinyfsm&#x2F;doc&#x2F;usage.html] USAGERefer to the API examples: &#x2F;examples&#x2F;api&#x2F; provided with the TinyFSM package for a quick overview. Recommended starting points:  Simple Sw">
+  <meta name="description" content="(tinyfsm usage)[https:&#x2F;&#x2F;digint.ch&#x2F;tinyfsm&#x2F;doc&#x2F;usage.html] USAGE Refer to the API examples: &#x2F;examples&#x2F;api&#x2F; provided with the TinyFSM package for a quick overview. Recommended starting points:  Simple S">
 <meta property="og:type" content="article">
 <meta property="og:title" content="tinyfsm">
 <meta property="og:url" content="http://example.com/2021/03/19/note/tinyfsm/index.html">
 <meta property="og:site_name" content="Aphelios">
-<meta property="og:description" content="(tinyfsm usage)[https:&#x2F;&#x2F;digint.ch&#x2F;tinyfsm&#x2F;doc&#x2F;usage.html] USAGERefer to the API examples: &#x2F;examples&#x2F;api&#x2F; provided with the TinyFSM package for a quick overview. Recommended starting points:  Simple Sw">
+<meta property="og:description" content="(tinyfsm usage)[https:&#x2F;&#x2F;digint.ch&#x2F;tinyfsm&#x2F;doc&#x2F;usage.html] USAGE Refer to the API examples: &#x2F;examples&#x2F;api&#x2F; provided with the TinyFSM package for a quick overview. Recommended starting points:  Simple S">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-03-19T01:16:18.000Z">
 <meta property="article:modified_time" content="2021-03-19T03:26:38.755Z">
@@ -191,8 +191,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>(tinyfsm usage)[<a target="_blank" rel="noopener" href="https://digint.ch/tinyfsm/doc/usage.html]">https://digint.ch/tinyfsm/doc/usage.html]</a></p>
-<h1 id="USAGE"><a href="#USAGE" class="headerlink" title="USAGE"></a>USAGE</h1><p>Refer to the API examples: <code>/examples/api/</code> provided with the TinyFSM package for a quick overview. Recommended starting points:</p>
+        <p>(tinyfsm usage)[https://digint.ch/tinyfsm/doc/usage.html]</p>
+<h1 id="usage">USAGE</h1>
+<p>Refer to the API examples: <code>/examples/api/</code> provided with the TinyFSM package for a quick overview. Recommended starting points:</p>
 <ul>
 <li>Simple Switch: <code>/examples/api/simple_switch.cpp</code></li>
 <li>Moore Machine: <code>/examples/api/moore_machine.cpp</code></li>
@@ -203,15 +204,15 @@
 <li><a target="_blank" rel="noopener" href="https://github.com/digint/openmptl/tree/master/projects/stm32f103stk-demo/src/screen.hpp">screen.hpp</a> : TinyFSM declarations.</li>
 <li><a target="_blank" rel="noopener" href="https://github.com/digint/openmptl/tree/master/projects/stm32f103stk-demo/src/kernel.cpp">kernel.cpp</a> : Poll input and trigger events.</li>
 </ul>
-<p>The examples in the documentation below are mainly based on the “Elevator Project” example.</p>
+<p>The examples in the documentation below are mainly based on the "Elevator Project" example.</p>
 <span id="more"></span>
-
-<h3 id="1-Declare-Events"><a href="#1-Declare-Events" class="headerlink" title="1. Declare Events"></a>1. Declare Events</h3><p>Declare events that your state machine will listen to. Events are classes derived from the tinyfsm::Event class.</p>
+<h3 id="declare-events">1. Declare Events</h3>
+<p>Declare events that your state machine will listen to. Events are classes derived from the tinyfsm::Event class.</p>
 <p>Example:</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">FloorEvent</span> :</span> tinyfsm::Event</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">int</span> <span class="built_in">floor</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Call</span>        :</span> FloorEvent &#123; &#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">FloorSensor</span> :</span> FloorEvent &#123; &#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Alarm</span>       :</span> tinyfsm::Event &#123; &#125;;</span><br></pre></td></tr></table></figure>
-
-<p>In the example above, we declare three events. Note that events are regular classes, which are passed as arguments to the react() members of a state class. In this example, we use a member variable “floor”, which is used to specify the floor number on “Call” and “FloorSensors” events.</p>
-<h3 id="2-Declare-the-State-Machine-Class"><a href="#2-Declare-the-State-Machine-Class" class="headerlink" title="2. Declare the State Machine Class"></a>2. Declare the State Machine Class</h3><p>Declare your state machine class. State machines are classes derived from the tinyfsm::Fsm template class, where T is the type name of the state machine itself.</p>
+<p>In the example above, we declare three events. Note that events are regular classes, which are passed as arguments to the react() members of a state class. In this example, we use a member variable "floor", which is used to specify the floor number on "Call" and "FloorSensors" events.</p>
+<h3 id="declare-the-state-machine-class">2. Declare the State Machine Class</h3>
+<p>Declare your state machine class. State machines are classes derived from the tinyfsm::Fsm template class, where T is the type name of the state machine itself.</p>
 <p>You need to declare the following public members:</p>
 <ul>
 <li>react() function for each event</li>
@@ -219,48 +220,47 @@
 </ul>
 <p>Example:</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Elevator</span></span></span><br><span class="line"><span class="class">:</span> <span class="keyword">public</span> tinyfsm::Fsm&lt;Elevator&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">/* default reaction for unhandled events */</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">react</span><span class="params">(tinyfsm::Event <span class="keyword">const</span> &amp;)</span> </span>&#123; &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">react</span><span class="params">(Call        <span class="keyword">const</span> &amp;)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">react</span><span class="params">(FloorSensor <span class="keyword">const</span> &amp;)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">void</span>         <span class="title">react</span><span class="params">(Alarm       <span class="keyword">const</span> &amp;)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">entry</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123; &#125;;  <span class="comment">/* entry actions in some states */</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span>         <span class="title">exit</span><span class="params">(<span class="keyword">void</span>)</span>  </span>&#123; &#125;;  <span class="comment">/* no exit actions */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>Note that you are free to declare the functions non-virtual if you like. This has implications on the execution speed: In the example above, the react(Alarm) function is declared non-virtual, as all states share the same reaction for this event. This makes code execution faster when dispatching the “Alarm” event, since no vtable lookup is needed.</p>
-<h3 id="3-Declare-the-States"><a href="#3-Declare-the-States" class="headerlink" title="3. Declare the States"></a>3. Declare the States</h3><p>Declare the states of your state machine. States are classes derived from the state machine class.</p>
+<p>Note that you are free to declare the functions non-virtual if you like. This has implications on the execution speed: In the example above, the react(Alarm) function is declared non-virtual, as all states share the same reaction for this event. This makes code execution faster when dispatching the "Alarm" event, since no vtable lookup is needed.</p>
+<h3 id="declare-the-states">3. Declare the States</h3>
+<p>Declare the states of your state machine. States are classes derived from the state machine class.</p>
 <p>Note that state classes are <em>implicitly instantiated</em>. If you want to reuse states in multiple state machines, you need to declare them as templates (see <code>/examples/api/multiple_switch.cpp</code>).</p>
 <p>Example:</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Panic</span></span></span><br><span class="line"><span class="class">:</span> <span class="keyword">public</span> Elevator</span><br><span class="line">&#123;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">entry</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Moving</span></span></span><br><span class="line"><span class="class">:</span> <span class="keyword">public</span> Elevator</span><br><span class="line">&#123;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">react</span><span class="params">(FloorSensor <span class="keyword">const</span> &amp;)</span> <span class="keyword">override</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Idle</span></span></span><br><span class="line"><span class="class">:</span> <span class="keyword">public</span> Elevator</span><br><span class="line">&#123;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">entry</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">react</span><span class="params">(Call <span class="keyword">const</span> &amp; e)</span> <span class="keyword">override</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>In this example, we declare three states. Note that the “elevator” example source code does not declare the states separately, but rather defines the code directly in the declaration.</p>
-<h3 id="4-Implement-Actions-and-Event-Reactions"><a href="#4-Implement-Actions-and-Event-Reactions" class="headerlink" title="4. Implement Actions and Event Reactions"></a>4. Implement Actions and Event Reactions</h3><p>In most cases, event reactions consist of one or more of the following steps:</p>
+<p>In this example, we declare three states. Note that the "elevator" example source code does not declare the states separately, but rather defines the code directly in the declaration.</p>
+<h3 id="implement-actions-and-event-reactions">4. Implement Actions and Event Reactions</h3>
+<p>In most cases, event reactions consist of one or more of the following steps:</p>
 <ul>
 <li>Change some local data</li>
 <li>Send events to other state machines</li>
 <li>Transit to different state</li>
 </ul>
 <p><strong>Important</strong>: Make sure that the <code>transit&lt;&gt;()</code> function call is the last command executed within a reaction function!</p>
-<p><strong>Important</strong>: Don’t use <code>transit&lt;&gt;()</code> in entry/exit actions!</p>
+<p><strong>Important</strong>: Don't use <code>transit&lt;&gt;()</code> in entry/exit actions!</p>
 <p>Example:</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Idle::entry</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  send_event(MotorStop());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Idle::react</span><span class="params">(Call <span class="keyword">const</span> &amp; e)</span> </span>&#123;</span><br><span class="line">  dest_floor = e.<span class="built_in">floor</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(dest_floor == current_floor)</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* lambda function used for transition action */</span></span><br><span class="line">  <span class="keyword">auto</span> action = [] &#123; </span><br><span class="line">    <span class="keyword">if</span>(dest_floor &gt; current_floor)</span><br><span class="line">      send_event(MotorUp());</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(dest_floor &lt; current_floor)</span><br><span class="line">      send_event(MotorDown());</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  transit&lt;Moving&gt;(action);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>In this </p>
+<p>In this</p>
 <p>example, we use a lambda function as transition action. The <code>transit&lt;&gt;()</code> function does the following:</p>
-<ol>
+<ol type="1">
 <li>Call the exit() function of the current state</li>
 <li>Call the the transition action if provided</li>
 <li>Change the current state to the new state</li>
 <li>Call the entry() function of the new state</li>
 </ol>
 <p>Note that you can also pass condition functions to the <code>transit&lt;&gt;()</code> function.</p>
-<h3 id="5-Define-the-Initial-State"><a href="#5-Define-the-Initial-State" class="headerlink" title="5. Define the Initial State"></a>5. Define the Initial State</h3><p>Use the macro <code>FSM_INITIAL_STATE(fsm, state)</code> for defining the initial state (or “start state”) of your state machine:</p>
+<h3 id="define-the-initial-state">5. Define the Initial State</h3>
+<p>Use the macro <code>FSM_INITIAL_STATE(fsm, state)</code> for defining the initial state (or "start state") of your state machine:</p>
 <p>Example:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FSM_INITIAL_STATE(Elevator, Idle)</span><br></pre></td></tr></table></figure>
-
-<p>This sets the current state of the “Elevator” state machine to “Idle”. More specifially, it defines a template specialization for <code>Fsm&lt;Elevator&gt;::set_initial_state()</code>, setting the current state to Idle.</p>
-<h3 id="6-Define-Custom-Initialization"><a href="#6-Define-Custom-Initialization" class="headerlink" title="6. Define Custom Initialization"></a>6. Define Custom Initialization</h3><p>If you need to perform custom initialization, you can override the reset() member function in your state machine class. If you are using state variables, you can re-instantiate your states by calling <code>tinyfsm::StateList&lt;MyStates...&gt;::reset()</code>.</p>
+<p>This sets the current state of the "Elevator" state machine to "Idle". More specifially, it defines a template specialization for <code>Fsm&lt;Elevator&gt;::set_initial_state()</code>, setting the current state to Idle.</p>
+<h3 id="define-custom-initialization">6. Define Custom Initialization</h3>
+<p>If you need to perform custom initialization, you can override the reset() member function in your state machine class. If you are using state variables, you can re-instantiate your states by calling <code>tinyfsm::StateList&lt;MyStates...&gt;::reset()</code>.</p>
 <p>Example:</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Switch</span> :</span> <span class="keyword">public</span> tinyfsm::Fsm&lt;Switch&gt;</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">public</span>: <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">reset</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    tinyfsm::StateList&lt;Off, On&gt;::reset();  <span class="comment">// reset all states</span></span><br><span class="line">    myvar = <span class="number">0</span>;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Make sure to always set the current state, or you’ll end up with a null pointer dereference.</p>
-<h3 id="7-Use-FsmList-for-Event-Dispatching"><a href="#7-Use-FsmList-for-Event-Dispatching" class="headerlink" title="7. Use FsmList for Event Dispatching"></a>7. Use FsmList for Event Dispatching</h3><p>You might have noticed some calls to a send_event() function in the example above. This is NOT a function provided with TinyFSM. Since event dispatching can be implemented in several ways, TinyFSM leaves this open to you. The “elevator” example implements the send_event() function as <em>direct event dispatching</em>, without using event queues. This has the advantage that execution is much faster, since no RTTI is needed and the decision which function to call for an event class is made at compile-time. On the other hand, special care has to be taken when designing the state machines, in order to avoid loops.</p>
-<p>Code from “fsmlist.hpp”:</p>
+<p>Make sure to always set the current state, or you'll end up with a null pointer dereference.</p>
+<h3 id="use-fsmlist-for-event-dispatching">7. Use FsmList for Event Dispatching</h3>
+<p>You might have noticed some calls to a send_event() function in the example above. This is NOT a function provided with TinyFSM. Since event dispatching can be implemented in several ways, TinyFSM leaves this open to you. The "elevator" example implements the send_event() function as <em>direct event dispatching</em>, without using event queues. This has the advantage that execution is much faster, since no RTTI is needed and the decision which function to call for an event class is made at compile-time. On the other hand, special care has to be taken when designing the state machines, in order to avoid loops.</p>
+<p>Code from "fsmlist.hpp":</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> tinyfsm::FsmList&lt;Motor, Elevator&gt; fsm_list;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> E&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">send_event</span><span class="params">(E <span class="keyword">const</span> &amp; event)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  fsm_list::<span class="keyword">template</span> dispatch&lt;E&gt;(event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>Here, send_event() dispatches events to all state machines in the list. It is important to understand that this approach comes with no performance penalties at all, as long as the default reaction is defined empty within the state machine declaration.</p>
 
     </div>
@@ -342,7 +342,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#USAGE"><span class="nav-number">1.</span> <span class="nav-text">USAGE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Declare-Events"><span class="nav-number">1.0.1.</span> <span class="nav-text">1. Declare Events</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Declare-the-State-Machine-Class"><span class="nav-number">1.0.2.</span> <span class="nav-text">2. Declare the State Machine Class</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Declare-the-States"><span class="nav-number">1.0.3.</span> <span class="nav-text">3. Declare the States</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Implement-Actions-and-Event-Reactions"><span class="nav-number">1.0.4.</span> <span class="nav-text">4. Implement Actions and Event Reactions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Define-the-Initial-State"><span class="nav-number">1.0.5.</span> <span class="nav-text">5. Define the Initial State</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Define-Custom-Initialization"><span class="nav-number">1.0.6.</span> <span class="nav-text">6. Define Custom Initialization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Use-FsmList-for-Event-Dispatching"><span class="nav-number">1.0.7.</span> <span class="nav-text">7. Use FsmList for Event Dispatching</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#usage"><span class="nav-number">1.</span> <span class="nav-text">USAGE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#declare-events"><span class="nav-number">1.0.1.</span> <span class="nav-text">1. Declare Events</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#declare-the-state-machine-class"><span class="nav-number">1.0.2.</span> <span class="nav-text">2. Declare the State Machine Class</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#declare-the-states"><span class="nav-number">1.0.3.</span> <span class="nav-text">3. Declare the States</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#implement-actions-and-event-reactions"><span class="nav-number">1.0.4.</span> <span class="nav-text">4. Implement Actions and Event Reactions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#define-the-initial-state"><span class="nav-number">1.0.5.</span> <span class="nav-text">5. Define the Initial State</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#define-custom-initialization"><span class="nav-number">1.0.6.</span> <span class="nav-text">6. Define Custom Initialization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#use-fsmlist-for-event-dispatching"><span class="nav-number">1.0.7.</span> <span class="nav-text">7. Use FsmList for Event Dispatching</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -356,7 +356,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -443,6 +443,8 @@
 
 
 
+
+  
 
   
 

@@ -150,6 +150,79 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/10/Apollo/Planning/1_4_path_bounds_decider/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="the Weapon of the Faithful">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aphelios">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/10/Apollo/Planning/1_4_path_bounds_decider/" class="post-title-link" itemprop="url">1.4 Path Bound Decider</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-03-10 19:11:43" itemprop="dateCreated datePublished" datetime="2021-03-10T19:11:43+08:00">2021-03-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-03-18 11:20:41" itemprop="dateModified" datetime="2021-03-18T11:20:41+08:00">2021-03-18</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>前面几个decider更偏向于make decision，通过外部环境选择自车的动作 接下来的目标是根据道路、障碍物以及前几步的decision-making建立数学模型来求解轨迹</p>
+<p>视频： <iframe src="//player.bilibili.com/player.html?aid=289090335&bvid=BV1qf4y1r7o5&cid=292510772&page=1" scrolling="no" border="0" frameborder="no" height="480" width="720" framespacing="0" allowfullscreen="true"> </iframe></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/10/Apollo/Planning/1_4_path_bounds_decider/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/09/Apollo/Planning/1_3_path_lane_borrow_decider/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -270,7 +343,7 @@
 
       
           <blockquote>
-<p>换道时复用上一时刻的轨迹，配置中默认关闭了。<br>如果有Path Reuse的话，就不需要跑下面的PATH_LANE_BORROW_DECIDER、PATH_BOUND_DECIDER了</p>
+<p>换道时复用上一时刻的轨迹，配置中默认关闭了。 如果有Path Reuse的话，就不需要跑下面的PATH_LANE_BORROW_DECIDER、PATH_BOUND_DECIDER了</p>
 </blockquote>
           <!--noindex-->
             <div class="post-button">
@@ -477,7 +550,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-18 11:21:03" itemprop="dateModified" datetime="2021-03-18T11:21:03+08:00">2021-03-18</time>
+                <time title="Modified: 2021-04-01 09:45:10" itemprop="dateModified" datetime="2021-04-01T09:45:10+08:00">2021-04-01</time>
               </span>
 
           
@@ -585,7 +658,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -674,6 +747,61 @@
 
 
   
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 

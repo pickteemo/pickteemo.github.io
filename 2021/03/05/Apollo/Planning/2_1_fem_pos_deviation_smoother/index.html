@@ -28,7 +28,7 @@
 <meta property="og:description" content="目录：modules&#x2F;planning&#x2F;math&#x2F;discretized_points_smoothing&#x2F;fem_pos_deviation_osqp_interface.cc 平滑类比较独立，所以单独摘出来看 设计了三个代价函数，分别代表了平滑性、曲线总长度和参考点距离">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-03-05T11:11:43.000Z">
-<meta property="article:modified_time" content="2021-03-18T03:21:03.688Z">
+<meta property="article:modified_time" content="2021-04-01T01:45:10.684Z">
 <meta property="article:tag" content="Apollo">
 <meta name="twitter:card" content="summary">
 
@@ -184,7 +184,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-18 11:21:03" itemprop="dateModified" datetime="2021-03-18T11:21:03+08:00">2021-03-18</time>
+                <time title="Modified: 2021-04-01 09:45:10" itemprop="dateModified" datetime="2021-04-01T09:45:10+08:00">2021-04-01</time>
               </span>
 
           
@@ -202,13 +202,51 @@
 <p>平滑类比较独立，所以单独摘出来看</p>
 <p>设计了三个代价函数，分别代表了平滑性、曲线总长度和参考点距离</p>
 <span id="more"></span>
-
 <p>另外注意到，大部分场景都是只考虑平滑性（平滑性权重默认设置为1e7，其他的权重设置为1）</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/ApolloAuto/apollo/commit/3decb9251da7e10b8ddf730c92cb1834a551b099">只有在OpenSpacePlanner中，多考虑了一点到原参考点距离，权重设置的也比较低，只有1e3</a></p>
-<p>因此下方，以6个点P0,P1,P2…P6为例子，只考虑平滑性代价时：<br>$cost = \sum_{i=0}^{n-2}((x_i + x_{i+2}-2\times x_{i+1})^2 + (y_i + y_{i+2}-2\times y_{i+1})^2)$<br>将上方cost乘开，转为QP公式<br>$$<br>\frac{1}{2}\cdot x^T\cdot Q\cdot x+p^T\cdot x\<br>s.t. LB \leq A\cdot x \leq UB<br>$$<br>没有一次项，p矩阵为0<br>Q矩阵如下：<br>$$<br>\begin{vmatrix}<br>1 &amp; -2 &amp; 1 &amp; 0 &amp; 0 &amp; 0\<br>-2 &amp; 5 &amp; -4 &amp; 1 &amp; 0 &amp; 0\<br>1 &amp; -4 &amp; 6 &amp; -4 &amp; 1 &amp; 0\<br>0 &amp; 1 &amp; -4 &amp; 6 &amp; -4 &amp; 1\<br>0 &amp; 0 &amp; 1 &amp; -4 &amp; 5 &amp; -2\<br>0 &amp; 0 &amp; 0 &amp; 1 &amp; 2 &amp; 1<br>\end{vmatrix}<br>$$</p>
-<p>LB和UB是根据左右道路宽度来取的<br>设置完成后调用osqp求解器进行求解</p>
-<p>除了平滑性，还配置了曲线总长度和参考线距离两个代价函数。<br>曲线总长度代价，使用积分进行运算：<br>$cost = \sum_{i=0}^{n-1}(x_i - x_{i+1})^2 + (y_i - y_{i+1})^2$<br>转为QP公式，一次项为0<br>二次项矩阵：<br>$$<br>\begin{vmatrix}<br>1 &amp; -2 &amp; 0 &amp; 0 &amp; 0 &amp; 0\<br>0 &amp; 2 &amp; -2 &amp; 0 &amp; 0 &amp; 0\<br>0 &amp; 0 &amp; 2 &amp; -2 &amp; 0 &amp; 0\<br>0 &amp; 0 &amp; 0 &amp; 2 &amp; -2 &amp; 0\<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; 2 &amp; -2\<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1<br>\end{vmatrix}<br>$$</p>
-<p>到原参考点的距离：<br>$cost = \sum_{i=0}^{n-1}(x_i - x_{ref})^2 + (y_i - y_{ref})^2$<br>Q矩阵：<br>$$<br>\begin{vmatrix}<br>1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\<br>0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\<br>0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\<br>0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0\<br>0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1<br>\end{vmatrix}<br>$$<br>q矩阵：<br>$$<br>\begin{vmatrix}<br>-2\cdot x_{ref1}\<br>-2\cdot x_{ref2}\<br>-2\cdot x_{ref3}\<br>-2\cdot x_{ref4}\<br>-2\cdot x_{ref5}\<br>-2\cdot x_{ref6}<br>\end{vmatrix}<br>$$</p>
+<p>因此下方，以6个点P0,P1,P2...P6为例子，只考虑平滑性代价时： <span class="math inline">\(cost = \sum_{i=0}^{n-2}((x_i + x_{i+2}-2\times x_{i+1})^2 + (y_i + y_{i+2}-2\times y_{i+1})^2)\)</span> 将上方cost乘开，转为QP公式 <span class="math display">\[
+\frac{1}{2}\cdot x^T\cdot Q\cdot x+p^T\cdot x\\
+s.t. LB \leq A\cdot x \leq UB
+\]</span> 没有一次项，p矩阵为0 Q矩阵如下： <span class="math display">\[
+\begin{vmatrix}
+1 &amp; -2 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\ 
+-2 &amp; 5 &amp; -4 &amp; 1 &amp; 0 &amp; 0\\ 
+1 &amp; -4 &amp; 6 &amp; -4 &amp; 1 &amp; 0\\ 
+0 &amp; 1 &amp; -4 &amp; 6 &amp; -4 &amp; 1\\ 
+0 &amp; 0 &amp; 1 &amp; -4 &amp; 5 &amp; -2\\ 
+0 &amp; 0 &amp; 0 &amp; 1 &amp; 2 &amp; 1
+\end{vmatrix}
+\]</span></p>
+<p>LB和UB是根据左右道路宽度来取的 设置完成后调用osqp求解器进行求解</p>
+<p>除了平滑性，还配置了曲线总长度和参考线距离两个代价函数。 曲线总长度代价，使用积分进行运算： <span class="math inline">\(cost = \sum_{i=0}^{n-1}(x_i - x_{i+1})^2 + (y_i - y_{i+1})^2\)</span> 转为QP公式，一次项为0 二次项矩阵： <span class="math display">\[
+\begin{vmatrix}
+1 &amp; -2 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 
+0 &amp; 2 &amp; -2 &amp; 0 &amp; 0 &amp; 0\\ 
+0 &amp; 0 &amp; 2 &amp; -2 &amp; 0 &amp; 0\\ 
+0 &amp; 0 &amp; 0 &amp; 2 &amp; -2 &amp; 0\\ 
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 2 &amp; -2\\ 
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1
+\end{vmatrix}
+\]</span></p>
+<p>到原参考点的距离： <span class="math inline">\(cost = \sum_{i=0}^{n-1}(x_i - x_{ref})^2 + (y_i - y_{ref})^2\)</span> Q矩阵： <span class="math display">\[
+\begin{vmatrix}
+1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 
+0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 
+0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\ 
+0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\\ 
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0\\ 
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1
+\end{vmatrix}
+\]</span> q矩阵： <span class="math display">\[
+\begin{vmatrix}
+-2\cdot x_{ref1}\\
+-2\cdot x_{ref2}\\
+-2\cdot x_{ref3}\\
+-2\cdot x_{ref4}\\
+-2\cdot x_{ref5}\\
+-2\cdot x_{ref6}
+\end{vmatrix}
+\]</span></p>
 
     </div>
 
@@ -302,7 +340,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -391,6 +429,61 @@
 
 
   
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 
