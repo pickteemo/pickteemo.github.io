@@ -150,6 +150,237 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/17/note/protobuf-reflection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="the Weapon of the Faithful">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aphelios">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/17/note/protobuf-reflection/" class="post-title-link" itemprop="url">Protobuf Reflection Note</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-03-17 14:19:24" itemprop="dateCreated datePublished" datetime="2021-03-17T14:19:24+08:00">2021-03-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-03-18 16:31:31" itemprop="dateModified" datetime="2021-03-18T16:31:31+08:00">2021-03-18</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="protobuf-reflection-note">ProtoBuf Reflection Note</h1>
+<p>参考：<a target="_blank" rel="noopener" href="https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.descriptor#DescriptorPool.generated_pool.details">官方文档 Descriptor</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Solstice/archive/2011/04/03/2004458.html">一种自动反射消息类型的 Google Protobuf 网络传输方案</a></p>
+<p>Proto使用过程中，有这样几个问题：</p>
+<ol type="1">
+<li><p>对proto中已有的内容进行修改/删除非常不方便，例如将proto中的一个字段foo删除，需要：</p>
+<ol type="1">
+<li>在.proto里把foo删掉并重新编译，</li>
+<li>在工程中删除所有的foo(),set_foo(),mutable_foo()等,否则编译会挂掉。</li>
+</ol>
+<p>尤其当foo不仅仅是一个变量时，或者该proto同时被很多工程使用时，会非常麻烦。</p></li>
+<li><p>拿到了一个pb对象，希望遍历该对象的所有字段(反序列化）。</p>
+<p>例如定义一个pb message如下：</p>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Person person;</span><br><span class="line">person.set_name(<span class="string">&quot;yingshin&quot;</span>);</span><br><span class="line">person.set_age(<span class="number">21</span>);</span><br></pre></td></tr></table></figure>
+<p>希望将该对象自动转为json格式的字符串：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;name&quot;</span>:<span class="string">&quot;yingshin&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;age&quot;</span>:<span class="number">21</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果添加了新的字段，输出也能自动更新。</p></li>
+</ol>
+<h3 id="反射">反射</h3>
+<p>protobuf提供了一种反射机制，能够动态地调用对象并获取信息。利用protobuf的反射机制，可以帮助优化以上两种场景。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/17/note/protobuf-reflection/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/17/Apollo/Planning/1_11_speed_heuristic_optimizer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="the Weapon of the Faithful">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aphelios">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/17/Apollo/Planning/1_11_speed_heuristic_optimizer/" class="post-title-link" itemprop="url">1.11 Speed Heuristic Optimizer</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-03-17 11:44:47 / Modified: 11:44:50" itemprop="dateCreated datePublished" datetime="2021-03-17T11:44:47+08:00">2021-03-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>DP</p>
+<p>参考https://blog.csdn.net/qq_41324346/article/details/105285029</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/17/Apollo/Planning/1_11_speed_heuristic_optimizer/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/Apollo/Planning/1_10_speed_bounds_prior_decider/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="the Weapon of the Faithful">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aphelios">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/16/Apollo/Planning/1_10_speed_bounds_prior_decider/" class="post-title-link" itemprop="url">1.10 Speed Bounds Prior Decider</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-03-16 19:11:43" itemprop="dateCreated datePublished" datetime="2021-03-16T19:11:43+08:00">2021-03-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-03-18 11:20:25" itemprop="dateModified" datetime="2021-03-18T11:20:25+08:00">2021-03-18</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>这个task会执行两次，主要业务是把障碍物投到st图，再设置path上的速度限制。</p>
+<p>第一次跑不涉及障碍物在速度方面的decision，第二次是在添加decision之后，需要考虑decision。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/16/Apollo/Planning/1_10_speed_bounds_prior_decider/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/15/Apollo/Planning/1_9_ST_bound_decider/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -360,80 +591,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/03/14/Apollo/Planning/1_8_rule_base_stop_decider/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/13/Leetcode/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="the Weapon of the Faithful">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Aphelios">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/13/Leetcode/" class="post-title-link" itemprop="url">Leetcode Note</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2021-03-13 19:11:43" itemprop="dateCreated datePublished" datetime="2021-03-13T19:11:43+08:00">2021-03-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-15 09:45:05" itemprop="dateModified" datetime="2021-03-15T09:45:05+08:00">2021-03-15</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <ul>
-<li>561 数组拆分 - Easy</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/13/Leetcode/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -745,150 +902,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/12/Apollo/Planning/1_6_path_assessment_decider/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="the Weapon of the Faithful">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Aphelios">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/12/Apollo/Planning/1_6_path_assessment_decider/" class="post-title-link" itemprop="url">1.6 Path Assessment Decider</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2021-03-12 19:11:43" itemprop="dateCreated datePublished" datetime="2021-03-12T19:11:43+08:00">2021-03-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-18 11:20:35" itemprop="dateModified" datetime="2021-03-18T11:20:35+08:00">2021-03-18</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>path optimizer根据boundaries生成了很多条空间上的path 在进行速度规划之前，需要先验证生成的path的合理性
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/12/Apollo/Planning/1_6_path_assessment_decider/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/11/Apollo/Planning/1_5_piecewise_jerk_path_optimizer/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="the Weapon of the Faithful">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Aphelios">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/11/Apollo/Planning/1_5_piecewise_jerk_path_optimizer/" class="post-title-link" itemprop="url">1.5 Piecewise Jerk Path Optimizer</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2021-03-11 19:11:43" itemprop="dateCreated datePublished" datetime="2021-03-11T19:11:43+08:00">2021-03-11</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-04-01 11:44:36" itemprop="dateModified" datetime="2021-04-01T11:44:36+08:00">2021-04-01</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>如下图所示，frenet坐标系下，给定边界，使用优化的思想求解轨迹 <a target="_blank" rel="noopener" href="https://imgchr.com/i/y1of1I"><img src="https://s3.ax1x.com/2021/02/04/y1of1I.png" alt="y1of1I.png" /></a>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/11/Apollo/Planning/1_5_piecewise_jerk_path_optimizer/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -958,7 +971,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-count">28</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1049,59 +1062,6 @@
   
 
   
-      
-
-<script>
-  if (typeof MathJax === 'undefined') {
-    window.MathJax = {
-      loader: {
-        source: {
-          '[tex]/amsCd': '[tex]/amscd',
-          '[tex]/AMScd': '[tex]/amscd'
-        }
-      },
-      tex: {
-        inlineMath: {'[+]': [['$', '$']]},
-        tags: 'ams'
-      },
-      options: {
-        renderActions: {
-          findScript: [10, doc => {
-            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
-              const display = !!node.type.match(/; *mode=display/);
-              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
-              const text = document.createTextNode('');
-              node.parentNode.replaceChild(text, node);
-              math.start = {node: text, delim: '', n: 0};
-              math.end = {node: text, delim: '', n: 0};
-              doc.math.push(math);
-            });
-          }, '', false],
-          insertedScript: [200, () => {
-            document.querySelectorAll('mjx-container').forEach(node => {
-              let target = node.parentNode;
-              if (target.nodeName.toLowerCase() === 'li') {
-                target.parentNode.classList.add('has-jax');
-              }
-            });
-          }, '', false]
-        }
-      }
-    };
-    (function () {
-      var script = document.createElement('script');
-      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
-      script.defer = true;
-      document.head.appendChild(script);
-    })();
-  } else {
-    MathJax.startup.document.state(0);
-    MathJax.texReset();
-    MathJax.typeset();
-  }
-</script>
-
-    
 
   
 
