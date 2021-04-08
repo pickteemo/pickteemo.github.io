@@ -20,19 +20,19 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="配置文件：modules&#x2F;planning&#x2F;conf&#x2F;scenario&#x2F;lane_follow_config.pb.txt">
+  <meta name="description" content="Inner和InnerEntry 问题 调试状态机时发现状态机状态反复切换，观察Debug信息：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="1.0 Lane Follow Sceanrio &amp; Stage">
-<meta property="og:url" content="http://example.com/2021/03/06/apollo/planning/1_0_lane_follow_stage/index.html">
+<meta property="og:title" content="HSM">
+<meta property="og:url" content="http://example.com/2021/04/06/note/hsm_note/index.html">
 <meta property="og:site_name" content="Aphelios">
-<meta property="og:description" content="配置文件：modules&#x2F;planning&#x2F;conf&#x2F;scenario&#x2F;lane_follow_config.pb.txt">
+<meta property="og:description" content="Inner和InnerEntry 问题 调试状态机时发现状态机状态反复切换，观察Debug信息：">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-03-06T11:11:43.000Z">
-<meta property="article:modified_time" content="2021-03-18T03:20:56.948Z">
-<meta property="article:tag" content="Apollo">
+<meta property="article:published_time" content="2021-04-06T06:50:05.000Z">
+<meta property="article:modified_time" content="2021-04-06T07:23:02.397Z">
+<meta property="article:tag" content="hsm">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/2021/03/06/apollo/planning/1_0_lane_follow_stage/">
+<link rel="canonical" href="http://example.com/2021/04/06/note/hsm_note/">
 
 
 <script id="page-configurations">
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>1.0 Lane Follow Sceanrio & Stage | Aphelios</title>
+  <title>HSM | Aphelios</title>
   
 
 
@@ -154,7 +154,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/06/apollo/planning/1_0_lane_follow_stage/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/06/note/hsm_note/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -167,7 +167,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          1.0 Lane Follow Sceanrio & Stage
+          HSM
         </h1>
 
         <div class="post-meta">
@@ -176,16 +176,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2021-03-06 19:11:43" itemprop="dateCreated datePublished" datetime="2021-03-06T19:11:43+08:00">2021-03-06</time>
+              <time title="Created: 2021-04-06 14:50:05 / Modified: 15:23:02" itemprop="dateCreated datePublished" datetime="2021-04-06T14:50:05+08:00">2021-04-06</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-18 11:20:56" itemprop="dateModified" datetime="2021-03-18T11:20:56+08:00">2021-03-18</time>
-              </span>
 
           
 
@@ -198,12 +192,57 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <blockquote>
-<p>配置文件：modules/planning/conf/scenario/lane_follow_config.pb.txt</p>
-</blockquote>
+        <h3 id="inner和innerentry">Inner和InnerEntry</h3>
+<h4 id="问题">问题</h4>
+<p>调试状态机时发现状态机状态反复切换，观察Debug信息：</p>
 <span id="more"></span>
-<p>TASK task_type: LANE_CHANGE_DECIDER task_type: PATH_REUSE_DECIDER task_type: PATH_LANE_BORROW_DECIDER task_type: PATH_BOUNDS_DECIDER<br />
-task_type: PIECEWISE_JERK_PATH_OPTIMIZER task_type: PATH_ASSESSMENT_DECIDER task_type: PATH_DECIDER task_type: RULE_BASED_STOP_DECIDER task_type: ST_BOUNDS_DECIDER task_type: SPEED_BOUNDS_PRIORI_DECIDER task_type: SPEED_HEURISTIC_OPTIMIZER task_type: SPEED_DECIDER task_type: SPEED_BOUNDS_FINAL_DECIDER task_type: PIECEWISE_JERK_NONLINEAR_SPEED_OPTIMIZER task_type: RSS_DECIDER</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">HSM_2_hsm_info: Pop     : N2ab8planning22ChangeLaneStateMachine6ManualE</span><br><span class="line">HSM_1_hsm_info: Sibling : N2ab8planning22ChangeLaneStateMachine4AutoE</span><br><span class="line">HSM_1_hsm_info:  Inner   : N2ab8planning22ChangeLaneStateMachine11LaneKeepingE</span><br><span class="line"></span><br><span class="line">HSM_2_hsm_info:  Pop     : N2ab8planning22ChangeLaneStateMachine11LaneKeepingE</span><br><span class="line">HSM_1_hsm_info:  Sibling : N2ab8planning22ChangeLaneStateMachine13LeftIntendingE</span><br><span class="line"></span><br><span class="line">HSM_2_hsm_info:  Pop     : N2ab8planning22ChangeLaneStateMachine13LeftIntendingE</span><br><span class="line">HSM_1_hsm_info:  Inner   : N2ab8planning22ChangeLaneStateMachine11LaneKeepingE</span><br><span class="line">HSM_2_hsm_info:  Pop     : N2ab8planning22ChangeLaneStateMachine11LaneKeepingE</span><br><span class="line">HSM_1_hsm_info:  Sibling : N2ab8planning22ChangeLaneStateMachine13LeftIntendingE</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>按顺序进行如下切换：</p>
+<p>1.退出<strong>手动</strong>状态</p>
+<p>2.切换到<strong>自动</strong>状态</p>
+<p>3.进入下一层的<strong>LaneKeeping</strong>状态</p>
+<p>4.推出<strong>LaneKeeping</strong>状态</p>
+<p>5.进入<strong>LeftIntending</strong>状态</p>
+<p>6.推出<strong>LeftIntending</strong>状态</p>
+<p>……</p>
+<p>后面无限重复3-6步骤</p>
+<hr />
+<h4 id="解决">解决</h4>
+<p>本身状态机切换的GetTransition()函数正常</p>
+<p>查阅<a target="_blank" rel="noopener" href="https://github.com/amaiorano/hsm/wiki/Chapter-3.-The-H-in-HSM#inner-and-outer-states">官方文档</a>后发现进入下一层状态机有两个template函数： - InnerEntryTransition&lt;TargetState&gt; - InnerTransition&lt;TargetState&gt;</p>
+<hr />
+<p>对于InnerEntryTransition来说：</p>
+<blockquote>
+<p>When a state returns an InnerEntryTransition&lt;TargetState&gt;, the state machine will enter TargetState if no other inner state has been entered yet.</p>
+</blockquote>
+<p>调用InnerEntryTransition时，如果下一层状态为空，会直接进入下一层的TargetState状态</p>
+<blockquote>
+<p>In other words, if a state at depth D on the state stack returns InnerEntryTransition&lt;TargetState&gt;, as long as there is no state yet at depth D+1, TargetState will be created and pushed onto the stack. The next time the same state returns InnerEntryTransition&lt;TargetState&gt;, because an inner state has already been pushed, this transition will be ignored.</p>
+</blockquote>
+<p>也就是说假如目前在第D层，当D+1层有状态时，InnerEntryTransition会被忽略掉，D+1层没有状态时才能Push进状态。</p>
+<hr />
+<p>对于InnerTransition来说：</p>
+<blockquote>
+<p>In the previous section, we covered the InnerEntryTransition, which is used to push an inner state only if there is no inner state yet on the stack. The more generalized InnerTransition, on the other hand, is used to force an inner state onto the state stack, regardless of what's on it.</p>
+</blockquote>
+<p>InnerTransition一般用于强制指定下一层状态</p>
+<blockquote>
+<p>More specifically: when InnerTransition&lt;TargetState&gt; is returned from GetTransition, the state machine makes sure that TargetState becomes (or remains) the inner state. If there is no inner state yet, TargetState gets pushed. If the inner state is already TargetState, nothing happens. If the inner state is not TargetState, the current inner state - along with all its inners - are popped off the stack (from innermost out), and TargetState is then pushed.</p>
+</blockquote>
+<p>详细来说，调用InnerTransition时，会检查inner state是否是TargetState。</p>
+<p>如果调用后的状态不是TargetState，会将下一层的状态pop出来，再push进TargetState。</p>
+<hr />
+<h4 id="解决-1">解决</h4>
+<p>对于上面的问题：</p>
+<p>由于在LaneKeeping状态的GetTransition函数中会直接转到LeftIntending状态。</p>
+<p>导致InnerTransition调用后，TargetState（LaneKeeping）和ReturnState（LeftIntending）不一致。接着会将LeftIntending推出，又重新推入LaneKeeping进入循环。</p>
+<p>这里的问题是本应该使用InnerEntryTransition的场景，误用了InnerTransition函数。</p>
+<hr />
+<p>另外看到wiki中的<a target="_blank" rel="noopener" href="https://github.com/amaiorano/hsm/wiki/Chapter-5.-Best-Practices#prefer-innerentry--sibling-to-inner">best practices</a>中也推荐InnerEntry+sibing的方式：</p>
+<blockquote>
+<p>Inner transitions are almost never the right type of transition to use. The only times it makes sense to use Inner transitions is when a state needs to force transitions to specific inner states immediately. Typically, these inner states map directly to an enum value or to a series of simple if-else conditions, for example:</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Locomotion</span> :</span> BaseState</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="function"><span class="keyword">virtual</span> Transition <span class="title">GetTransition</span><span class="params">()</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			<span class="keyword">if</span> (Owner().PressedMove())</span><br><span class="line">				<span class="keyword">return</span> InnerTransition&lt;Move&gt;();</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				<span class="keyword">return</span> InnerTransition&lt;Stand&gt;();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;;</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -213,7 +252,7 @@ task_type: PIECEWISE_JERK_PATH_OPTIMIZER task_type: PATH_ASSESSMENT_DECIDER task
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Apollo/" rel="tag"># Apollo</a>
+              <a href="/tags/hsm/" rel="tag"># hsm</a>
           </div>
 
         
@@ -222,13 +261,10 @@ task_type: PIECEWISE_JERK_PATH_OPTIMIZER task_type: PATH_ASSESSMENT_DECIDER task
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/03/05/apollo/planning/2_1_fem_pos_deviation_smoother/" rel="prev" title="2.1 Fem Pos Deviation Smoother">
-      <i class="fa fa-chevron-left"></i> 2.1 Fem Pos Deviation Smoother
+    <a href="/2021/04/06/leetcode/80_remove_duplicates_from_sorted_array_ii/" rel="prev" title="80. 删除有序数组中的重复项 II">
+      <i class="fa fa-chevron-left"></i> 80. 删除有序数组中的重复项 II
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/03/07/apollo/planning/1_1_lane_change_decider/" rel="next" title="1.1 Lane Change Decider">
-      1.1 Lane Change Decider <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -287,6 +323,7 @@ task_type: PIECEWISE_JERK_PATH_OPTIMIZER task_type: PATH_ASSESSMENT_DECIDER task
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#inner%E5%92%8Cinnerentry"><span class="nav-number">1.</span> <span class="nav-text">Inner和InnerEntry</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3"><span class="nav-number">1.2.</span> <span class="nav-text">解决</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3-1"><span class="nav-number">1.3.</span> <span class="nav-text">解决</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
